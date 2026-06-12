@@ -25,25 +25,25 @@ namespace Artisan.UI
         {
             try
             {
-                ImGui.TextWrapped($"An expert solver profile is a snapshot, or \"loadout\", of specific expert solver settings. Like macros, different profiles can be assigned to specific expert recipes.");
+                ImGui.TextWrapped($"专家求解器配置文件是特定专家求解器设置的一个快照或\"配置方案\"。和宏一样，不同的配置文件可以分配给特定的专家配方。");
 
-                ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"IMPORTANT: These are not advanced settings or \"expert user\" profiles. They are exclusively for the expert recipe solver.");
+                ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"重要提示：这些不是高级设置或\"专家用户\"配置文件。它们仅用于专家配方求解器。");
                 var expertIcon = P.PluginUi.ExpertSettingsUI.expertIcon;
                 if (expertIcon != null)
                 {
-                    ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"Expert recipes have this icon in the crafting log:");
+                    ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"专家配方在制作笔记中显示为此图标：");
                     ImGui.SameLine();
                     ImGui.Image(expertIcon.Handle, expertIcon.Size, new Vector2(0, 0), new Vector2(1, 1), new Vector4(0.94f, 0.57f, 0f, 1f));
                 }
 
                 ImGui.Dummy(new Vector2(0, 5f));
-                if (IconButtons.IconTextButton(Dalamud.Interface.FontAwesomeIcon.ExternalLinkAlt, "Edit Global Expert Solver Settings"))
+                if (IconButtons.IconTextButton(Dalamud.Interface.FontAwesomeIcon.ExternalLinkAlt, "编辑全局专家求解器设置"))
                 {
                     P.PluginUi.OpenWindow = OpenWindow.Main;
                 }
 
                 ImGui.Dummy(new Vector2(0, 10f));
-                ImGui.TextWrapped("Left click a profile to edit. Right click a profile to select it without editing.");
+                ImGui.TextWrapped("左键单击配置文件进行编辑。右键单击配置文件以选中它而不编辑。");
 
                 ImGui.Dummy(new Vector2(0, 5f));
                 ImGui.Separator();
@@ -72,12 +72,12 @@ namespace Artisan.UI
 
         protected override string AddButtonTooltip()
         {
-            return "Add new profile";
+            return "添加新配置文件";
         }
 
         protected override string DeleteButtonTooltip()
         {
-            return "Permanently delete selected profile\r\n(hold Ctrl to confirm)";
+            return "永久删除选中的配置文件\r\n（按住 Ctrl 确认）";
         }
 
         protected override bool Filtered(int idx)

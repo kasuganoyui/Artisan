@@ -10,7 +10,7 @@ namespace Artisan.CraftingLogic.Solvers;
 
 public class MacroSolverDefinition : ISolverDefinition
 {
-    public string MouseoverDescription { get; set; } = "This is the equivalent of an in-game macro, with less restrictions.";
+    public string MouseoverDescription { get; set; } = "这相当于游戏内宏，但限制更少。";
 
     public IEnumerable<ISolverDefinition.Desc> Flavours(CraftState craft)
     {
@@ -19,7 +19,7 @@ public class MacroSolverDefinition : ISolverDefinition
             if (m.Steps.Count == 0) continue;
 
             var statsOk = m.Options.MinCraftsmanship <= craft.StatCraftsmanship && m.Options.MinControl <= craft.StatControl && m.Options.MinCP <= craft.StatCP;
-            yield return new(this, m.ID, 99, $"Macro: {m.Name}", statsOk ? "" : "You do not meet the minimum stats for this macro");
+            yield return new(this, m.ID, 99, $"宏：{m.Name}", statsOk ? "" : "你不满足该宏所需的最低属性要求");
         }
     }
 
@@ -30,7 +30,7 @@ public class MacroSolverDefinition : ISolverDefinition
         foreach (var m in P.Config.MacroSolverConfig.Macros)
         {
             if (m.Steps.Count == 0) continue;
-            yield return new(this, m.ID, 99, $"Macro: {m.Name}");
+            yield return new(this, m.ID, 99, $"宏：{m.Name}");
         }
     }
 }
@@ -133,8 +133,8 @@ public class MacroSolver : Solver, ICraftValidator
         // we've run out of macro steps, see if we can use solver to continue
         // TODO: this is not a very good condition, it depends on external state...
         if (!P.Config.DisableMacroArtisanRecommendation || CraftingListUI.Processing)
-            return new(fallback?.Action ?? Skills.None, fallback?.Action is null ? $"Macro has completed, the fallback solver is not working{(craft.UnlockedManipulation ? " " : " (You need to unlock Manipulation) ")}so you will have to manually finish this" : "Macro has completed. Now continuing with solver.");
-        return new(Skills.None, "Macro has completed. Please continue to manually craft.");
+            return new(fallback?.Action ?? Skills.None, fallback?.Action is null ? $"宏已完成，回退求解器无法工作{(craft.UnlockedManipulation ? " " : "（你需要解锁掌握）")}因此你需要手动完成制作" : "宏已完成。现在继续使用求解器。");
+        return new(Skills.None, "宏已完成。请继续手动制作。");
     }
 
     public static bool ActionIsQuality(Skills skill) => skill is Skills.BasicTouch or Skills.StandardTouch or Skills.AdvancedTouch or Skills.HastyTouch or Skills.PreparatoryTouch

@@ -41,12 +41,12 @@ namespace Artisan.CraftingLogic.Solvers
 
         public IEnumerable<ISolverDefinition.Desc> Flavours(CraftState craft)
         {
-            yield return new(this, 3, 2, $"Raphael Recipe Solver", craft.StatLevel < 7 ? $"Does not work before unlocking {Skills.MastersMend.NameOfAction()}. Please use Standard Recipe Solver" : "");
+            yield return new(this, 3, 2, $"Raphael 配方求解器", craft.StatLevel < 7 ? $"在解锁 {Skills.MastersMend.NameOfAction()} 之前无法使用。请使用标准配方求解器" : "");
         }
 
         public IEnumerable<ISolverDefinition.Desc> Flavours()
         {
-            yield return new(this, 3, 2, $"Raphael Recipe Solver");
+            yield return new(this, 3, 2, $"Raphael 配方求解器");
         }
     }
 
@@ -74,12 +74,13 @@ namespace Artisan.CraftingLogic.Solvers
             // don't build if a task is already running with these options
             var key = GetOptions(craft, config);
             if (!CLIExists() || Tasks.ContainsKey(key)) return;
+            var stellarHandUses = key.SteadyHandUses;
 
             // nuke the old macro if one exists
             P.Config.RaphaelSolverCacheV6.TryRemove(key, out _);
 
             var manipulation = config.HasManipulation ? "--manipulation" : "";
-            var itemText = $"--custom-recipe {craft.LevelTable.RowId} {craft.CraftProgress} {(craft.CraftCollectible && !craft.IsCosmic ? craft.CraftQualityMin3 : craft.CraftQualityMax)} {craft.CraftDurability} {(craft.CraftExpert ? "1" : "0")} --stellar-steady-hand {Math.Min(craft.CurrentSteadyHandCharges, P.Config.RaphaelSolverConfig.MaxStellarHand)}";
+            var itemText = $"--custom-recipe {craft.LevelTable.RowId} {craft.CraftProgress} {(craft.CraftCollectible && !craft.IsCosmic ? craft.CraftQualityMin3 : craft.CraftQualityMax)} {craft.CraftDurability} {(craft.CraftExpert ? "1" : "0")} --stellar-steady-hand {stellarHandUses}";
 
             var argsList = new List<string>
             {
@@ -130,7 +131,7 @@ namespace Artisan.CraftingLogic.Solvers
                         {
                             if (Tasks.TryRemove(key, out var t) && t.FromStartCraft && Crafting.CurState is Crafting.State.WaitStart)
                             {
-                                DuoLog.Error("Raphael has timed out or cancelled before a solution could be generated. Crafting will not start, please restart this craft.");
+                                DuoLog.Error("Raphael 在生成解决方案之前已超时或被取消。制作将不会开始，请重新开始此制作。");
                                 Crafting.CurState = Crafting.State.InvalidState;
                             }
                         }
@@ -154,11 +155,11 @@ namespace Artisan.CraftingLogic.Solvers
                             {
                                 if (craft.StatLevel >= 65 && !craft.UnlockedManipulation)
                                 {
-                                    DuoLog.Error($"Raphael was unable to solve this recipe. You haven't unlocked Manipulation. Go do your job quests then try again.");
+                                    DuoLog.Error("Raphael 无法求解此配方。你尚未解锁“掌握”。请先完成职业任务后再试。");
                                 }
                                 else
                                 {
-                                    DuoLog.Error($"Raphael was unable to solve this recipe. Please report this to the Discord with this line:\n\n{process.StartInfo.Arguments}");
+                                    DuoLog.Error($"Raphael 无法求解此配方。请将此行报告到 Discord：\n\n{process.StartInfo.Arguments}");
                                 }
                             }
 
@@ -174,27 +175,9 @@ namespace Artisan.CraftingLogic.Solvers
                         P.Config.RaphaelSolverCacheV6[key] = new MacroSolverSettings.Macro
                         {
                             ID = GetNewID(),
-                            Name = GetTextKey(craft, config),
+                            Name = GetKeyForLookups(key),
                             Steps = MacroUI.ParseMacro(cleansedOutput, craft),
-                            Options = new RaphaelOptions()
-                            {
-                                SkipQualityIfMet = false,
-                                UpgradeProgressActions = false,
-                                UpgradeQualityActions = false,
-                                MinCP = craft.StatCP,
-                                MinControl = craft.StatControl,
-                                MinCraftsmanship = craft.StatCraftsmanship,
-                                Level = craft.CraftLevel,
-                                StatLevel = craft.StatLevel,
-                                Progress = craft.CraftProgress,
-                                QualityMax = craft.CraftQualityMax,
-                                Durability = craft.CraftDurability,
-                                IsExpert = craft.CraftExpert,
-                                InitialQuality = craft.InitialQuality,
-                                IsSpecialist = craft.Specialist,
-                                SteadyHandUses = Math.Min(craft.CurrentSteadyHandCharges, P.Config.RaphaelSolverConfig.MaxStellarHand),
-                                SolutionConfig = config
-                            }
+                            Options = CreateOptions(craft, config, stellarHandUses)
                         };
 
                         Svc.Log.Debug($"Saved new macro to Raphael cache, ID: {P.Config.RaphaelSolverCacheV6[key].ID}");
@@ -250,7 +233,7 @@ namespace Artisan.CraftingLogic.Solvers
                         Svc.Log.Debug($"Skipping auto-switch for recipe {craft.Recipe.RowId} - Raphael solver not unlocked");
                         return;
                     }
-                    var nopt = CraftingProcessor.GetAvailableSolversForRecipe(craft, true).FirstOrNull(x => x.Name == $"Raphael Recipe Solver");
+                    var nopt = CraftingProcessor.GetAvailableSolversForRecipe(craft, true).FirstOrNull(x => x.Name == $"Raphael 配方求解器");
                     if (nopt is { } opt)
                     {
                         if (autoSwitchOk(craft.Recipe.RowId))
@@ -269,7 +252,7 @@ namespace Artisan.CraftingLogic.Solvers
                 {
                     var crafts = AllValidCrafts(key).ToList();
                     Svc.Log.Information($"Applying solver to {crafts.Count} recipes.");
-                    var nopt = CraftingProcessor.GetAvailableSolversForRecipe(craft, true).FirstOrNull(x => x.Name == $"Raphael Recipe Solver");
+                    var nopt = CraftingProcessor.GetAvailableSolversForRecipe(craft, true).FirstOrNull(x => x.Name == $"Raphael 配方求解器");
                     if (nopt is { } opt)
                     {
                         var config = P.Config.RecipeConfigs.GetValueOrDefault(craft.Recipe.RowId) ?? new();
@@ -301,7 +284,11 @@ namespace Artisan.CraftingLogic.Solvers
         public static RaphaelOptions GetOptions(CraftState craft, RaphaelSolutionConfig? config)
         {
             config ??= GetRaphConfig(craft);
+            return CreateOptions(craft, config, GetStellarHandUses(craft));
+        }
 
+        private static RaphaelOptions CreateOptions(CraftState craft, RaphaelSolutionConfig config, int stellarHandUses)
+        {
             return new RaphaelOptions()
             {
                 MinCraftsmanship = craft.StatCraftsmanship,
@@ -315,15 +302,31 @@ namespace Artisan.CraftingLogic.Solvers
                 IsExpert = craft.CraftExpert,
                 InitialQuality = craft.InitialQuality,
                 IsSpecialist = craft.Specialist,
-                SteadyHandUses = Math.Min(craft.CurrentSteadyHandCharges, P.Config.RaphaelSolverConfig.MaxStellarHand),
+                SteadyHandUses = stellarHandUses,
                 SolutionConfig = config
             };
+        }
+
+        public static int GetMaxStellarHand(CraftState craft)
+        {
+            var maxUses = P.Config.RaphaelSolverConfig.MaxStellarHand;
+            if (P.Config.RecipeConfigs.TryGetValue(craft.RecipeId, out var config) && config.RaphaelMaxStellarHand is { } recipeMaxUses)
+            {
+                maxUses = (int)Math.Min(recipeMaxUses, (uint)int.MaxValue);
+            }
+
+            return Math.Max(0, maxUses);
+        }
+
+        public static int GetStellarHandUses(CraftState craft)
+        {
+            return Math.Min(Math.Max(0, craft.CurrentSteadyHandCharges), GetMaxStellarHand(craft));
         }
 
         // this key is for identifying solutions while debugging; code should look up solutions by their RaphaelOptions
         public static string GetTextKey(CraftState craft, RaphaelSolutionConfig config)
         {
-            return $"{craft.CraftLevel}/{craft.CraftProgress}/{craft.CraftQualityMax}/{craft.CraftDurability}-{craft.StatCraftsmanship}/{craft.StatControl}/{craft.StatCP}-{(craft.CraftExpert ? "Ex" : "St")}/{craft.InitialQuality}/{(craft.Specialist ? "Sp" : "Re")}/Steady{Math.Min(craft.CurrentSteadyHandCharges, P.Config.RaphaelSolverConfig.MaxStellarHand)}-{(config.UseHeartAndSoul ? "1" : "0")}/{(config.UseQuickInno ? "1" : "0")}/{(config.HasManipulation ? "1" : "0")}/{(config.EnsureReliability ? "1" : "0")}/{(config.BackloadProgress ? "1" : "0")}";
+            return GetKeyForLookups(GetOptions(craft, config));
         }
 
         public static string GetKeyForLookups(RaphaelOptions opt)
@@ -402,7 +405,7 @@ namespace Artisan.CraftingLogic.Solvers
                 if (!hasSolution)
                 {
                     if (solverIsRaph)
-                        ImGuiEx.TextCentered(ImGuiColors.DalamudRed, "No Raphael solution generated");
+                        ImGuiEx.TextCentered(ImGuiColors.DalamudRed, "未生成 Raphael 解决方案");
                     if (P.Config.RaphaelSolverConfig.AutoGenerate && CraftingProcessor.GetAvailableSolversForRecipe(craft, true).Any() && (!craft.CraftExpert || (craft.CraftExpert && P.Config.RaphaelSolverConfig.GenerateOnExperts)))
                     {
                         Build(craft, curConfig);
@@ -412,6 +415,7 @@ namespace Artisan.CraftingLogic.Solvers
                 ImGui.Separator();
 
                 var inProgress = InProgress(craft, curConfig);
+                ImGuiEx.Text(ImGuiColors.DalamudGrey, $"Raphael 宇宙稳手上限：{GetMaxStellarHand(craft)}（本次可用 {GetStellarHandUses(craft)}）");
 
                 if (inProgress)
                     ImGui.BeginDisabled();
@@ -422,7 +426,7 @@ namespace Artisan.CraftingLogic.Solvers
 
                 if (showReliability || showBackload || showSpecialist)
                 {
-                    ImGuiEx.Text(ImGuiColors.DalamudGrey, "Raphael Solver Settings");
+                    ImGuiEx.Text(ImGuiColors.DalamudGrey, "Raphael 求解器设置");
                 }
                 else
                 {
@@ -431,21 +435,21 @@ namespace Artisan.CraftingLogic.Solvers
 
                 if (showReliability)
                 {
-                    ImGui.Checkbox($"Ensure 100% reliability##{keyStr}Reliability", ref P.Config.RaphaelSolverConfig.EnsureReliability);
-                    ImGuiComponents.HelpMarker("Try to find a solution that works for any permutation of per-step crafting conditions. EXTREMELY RAM AND CPU INTENSIVE NO SUPPORT WILL BE GIVEN IF YOU HAVE THIS ON");
+                    ImGui.Checkbox($"确保 100% 可靠性##{keyStr}Reliability", ref P.Config.RaphaelSolverConfig.EnsureReliability);
+                    ImGuiComponents.HelpMarker("尝试寻找适用于每步制作条件任意排列组合的解决方案。极度消耗内存和 CPU，开启此功能将不提供任何支持");
                 }
                 if (showBackload)
                 {
-                    ImGui.Checkbox($"Backload progress##{keyStr}Progress", ref P.Config.RaphaelSolverConfig.BackloadProgress);
-                    ImGuiComponents.HelpMarker($"Find a solution that finishes quality before starting on progress. Useful for simple expert recipes where the Malleable condition might otherwise cause an early finish.");
+                    ImGui.Checkbox($"后置进度##{keyStr}Progress", ref P.Config.RaphaelSolverConfig.BackloadProgress);
+                    ImGuiComponents.HelpMarker($"寻找先完成品质再开始进度的解决方案。适用于简单的专家配方，否则 Malleable 条件可能导致过早完成。");
                 }
                 if (showSpecialist)
                 {
-                    P.PluginUi.ExpertSettingsUI.CheckboxWithIcons($"{keyStr}HS", ref P.Config.RaphaelSolverConfig.UseHeartAndSoul, "Allow [s!HeartAndSoul]");
-                    ImGuiComponents.HelpMarker($"The generated macro will require one crafter's delineation per craft.");
+                    P.PluginUi.ExpertSettingsUI.CheckboxWithIcons($"{keyStr}HS", ref P.Config.RaphaelSolverConfig.UseHeartAndSoul, "允许使用 [s!HeartAndSoul]");
+                    ImGuiComponents.HelpMarker($"生成的宏每次制作将消耗一份能工巧匠图纸。");
 
-                    P.PluginUi.ExpertSettingsUI.CheckboxWithIcons($"{keyStr}QI", ref P.Config.RaphaelSolverConfig.UseQuickInno, "Allow [s!QuickInnovation]");
-                    ImGuiComponents.HelpMarker($"The generated macro will require one crafter's delineation per craft.");
+                    P.PluginUi.ExpertSettingsUI.CheckboxWithIcons($"{keyStr}QI", ref P.Config.RaphaelSolverConfig.UseQuickInno, "允许使用 [s!QuickInnovation]");
+                    ImGuiComponents.HelpMarker($"生成的宏每次制作将消耗一份能工巧匠图纸。");
                 }
 
                 if (showReliability || showBackload || showSpecialist)
@@ -460,9 +464,9 @@ namespace Artisan.CraftingLogic.Solvers
                 {
                     if (!inProgress)
                     {
-                        string verb = hasSolution ? "Rebuild" : "Build";
+                        string verb = hasSolution ? "重新生成" : "生成";
 
-                        if (ImGui.Button($"{verb} Raphael Solution", new Vector2(ImGui.GetContentRegionAvail().X, 25f.Scale())))
+                        if (ImGui.Button($"{verb} Raphael 解决方案", new Vector2(ImGui.GetContentRegionAvail().X, 25f.Scale())))
                         {
                             Build(craft, curConfig);
                         }
@@ -470,7 +474,7 @@ namespace Artisan.CraftingLogic.Solvers
                     }
                     else
                     {
-                        if (ImGui.Button("Cancel Raphael Generation", new Vector2(ImGui.GetContentRegionAvail().X, 25f.Scale())))
+                        if (ImGui.Button("取消 Raphael 生成", new Vector2(ImGui.GetContentRegionAvail().X, 25f.Scale())))
                         {
                             Tasks.TryRemove(opts, out var task);
                             task.Cancellation.Cancel();
@@ -481,18 +485,18 @@ namespace Artisan.CraftingLogic.Solvers
                 if (curConfig.EnsureReliability && ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
-                    ImGui.Text("\"Ensure 100% reliability\" is enabled, which is very CPU- and RAM-intensive.\nDue to this, no support will be given if you have issues.");
+                    ImGui.Text("“确保 100% 可靠性”已启用，这会非常消耗 CPU 和内存。\n因此，若遇到问题将不提供支持。");
                     ImGui.EndTooltip();
                 }
 
                 if (curConfig.UseHeartAndSoul || curConfig.UseQuickInno)
                 {
-                    ImGuiEx.Text(ImGuiColors.DalamudYellow, "Specialist actions are enabled. This can slow down the solver a lot.");
+                    ImGuiEx.Text(ImGuiColors.DalamudYellow, "专家技能已启用。这可能会大幅降低求解器速度。");
                 }
 
                 if (inProgress)
                 {
-                    ImGuiEx.TextCentered("Generating...");
+                    ImGuiEx.TextCentered("正在生成…");
                 }
 
                 ImGui.Dummy(new Vector2(0, 2f));
@@ -755,78 +759,78 @@ namespace Artisan.CraftingLogic.Solvers
                 string ConditionString = LuminaSheets.AddonSheet[215].Text.ToString();
 
                 ImGui.Dummy(new Vector2(0, 2f));
-                ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"Raphael settings can affect your performance and system memory consumption while generating a macro.\r\nIf you have low amounts of RAM, try not to change these settings. At least 2GB of free RAM is recommended.");
+                ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"Raphael 设置在生成宏时可能会影响性能和系统内存消耗。\r\n如果 RAM 较少，请尽量不要更改这些设置。建议至少有 2GB 的可用 RAM。");
 
                 ImGui.Indent();
 
                 ImGui.Dummy(new Vector2(0, 2f));
-                ImGui.TextWrapped($"Performance");
+                ImGui.TextWrapped($"性能");
                 ImGui.Dummy(new Vector2(0, 2f));
                 ImGui.Indent();
 
                 ImGui.PushItemWidth(250);
-                changed |= ImGui.SliderInt("Maximum threads (0 for all)", ref MaximumThreads, 0, Environment.ProcessorCount);
-                ImGuiComponents.HelpMarker("By default the Raphael generator uses everything it can (setting = 0), but on lower-end machines you might need to use less CPU at the cost of speed.");
+                changed |= ImGui.SliderInt("最大线程数（0 表示全部）", ref MaximumThreads, 0, Environment.ProcessorCount);
+                ImGuiComponents.HelpMarker("默认情况下 Raphael 生成器会使用所有可用资源（设置为 0），但在低端机器上可能需要减少 CPU 使用，代价是速度降低。");
 
-                changed |= ImGui.Checkbox("Allow \"Ensure 100% reliability\"", ref AllowEnsureReliability);
-                ImGuiComponents.HelpMarker("Enables a checkbox on the Crafting Log mini-menu. This setting will try to find a solution that works for any permutation of per-step crafting conditions.");
-                ImGuiEx.TextWrapped(new System.Numerics.Vector4(255, 0, 0, 1), "Ensuring reliability may not always work and is very CPU and RAM intensive. 16GB+ of spare RAM is recommended. NO SUPPORT SHALL BE GIVEN IF YOU HAVE THIS ON");
+                changed |= ImGui.Checkbox("允许“确保 100% 可靠性”", ref AllowEnsureReliability);
+                ImGuiComponents.HelpMarker("在制作笔记迷你菜单中启用一个复选框。此设置将尝试寻找适用于每步制作条件任意排列组合的解决方案。");
+                ImGuiEx.TextWrapped(new System.Numerics.Vector4(255, 0, 0, 1), "确保可靠性不一定总是有效，且非常消耗 CPU 和内存。建议有 16GB 以上的可用 RAM。开启此功能将不提供任何支持");
 
                 ImGui.Dummy(new Vector2(0, 2f));
-                changed |= ImGui.SliderInt("Macro generation timeout (minutes)", ref TimeOutMins, 1, 15);
-                ImGuiComponents.HelpMarker($"If a solution takes longer than this many minutes to generate, macro generation will be canceled.");
+                changed |= ImGui.SliderInt("宏生成超时（分钟）", ref TimeOutMins, 1, 15);
+                ImGuiComponents.HelpMarker($"如果生成解决方案的时间超过此分钟数，宏生成将被取消。");
 
                 ImGui.Unindent();
                 ImGui.Dummy(new Vector2(0, 2f));
-                ImGui.TextWrapped($"Automatic Usage");
+                ImGui.TextWrapped($"自动使用");
                 ImGui.Dummy(new Vector2(0, 2f));
                 ImGui.Indent();
 
-                changed |= ImGui.Checkbox($"Automatically generate a Raphael macro if a valid one hasn't been created", ref AutoGenerate);
+                changed |= ImGui.Checkbox($"如果尚未创建有效的 Raphael 宏，则自动生成", ref AutoGenerate);
                 if (AutoGenerate)
                 {
                     ImGui.Indent();
-                    changed |= ImGui.Checkbox($"Automatically generate on expert recipes", ref GenerateOnExperts);
+                    changed |= ImGui.Checkbox($"在专家配方上自动生成", ref GenerateOnExperts);
                     ImGui.Unindent();
                 }
 
-                changed |= ImGui.Checkbox("Automatically switch to the Raphael macro once one has been created", ref AutoSwitch);
+                changed |= ImGui.Checkbox("创建后自动切换到 Raphael 宏", ref AutoSwitch);
                 if (AutoSwitch)
                 {
                     ImGui.Indent();
-                    changed |= ImGui.Checkbox("Apply to all valid crafts", ref AutoSwitchOnAll);
-                    changed |= ImGui.Checkbox("Overwrite crafts that already have a macro assigned to them", ref AutoSwitchOverManual);
+                    changed |= ImGui.Checkbox("应用于所有有效的制作", ref AutoSwitchOnAll);
+                    changed |= ImGui.Checkbox("覆盖已分配了宏的制作", ref AutoSwitchOverManual);
                     ImGui.Unindent();
                 }
 
-                changed |= ImGui.Checkbox("Use Raphael as default solver", ref DefaultRaphSolver);
-                ImGuiComponents.HelpMarker("Important notes:\r\n\r\n• Any recipes opened with Artisan before changing this setting will still use their current solvers.\r\n• If you disable this setting, any recipes that were set to Raphael will stay that way until changed.\r\n• The Standard Solver is used as the default solver if this setting is disabled.");
+                changed |= ImGui.Checkbox("使用 Raphael 作为默认求解器", ref DefaultRaphSolver);
+                ImGuiComponents.HelpMarker("重要说明：\r\n\r\n• 在更改此设置之前使用 Artisan 打开的任何配方仍将使用其当前的求解器。\r\n• 如果禁用此设置，任何已设置为 Raphael 的配方将保持不变，直到手动更改。\r\n• 如果此设置被禁用，将使用标准求解器作为默认求解器。");
 
                 ImGui.Unindent();
                 ImGui.Dummy(new Vector2(0, 2f));
-                ImGui.TextWrapped($"Macro Generation");
+                ImGui.TextWrapped($"宏生成");
                 ImGui.Dummy(new Vector2(0, 2f));
                 ImGui.Indent();
 
                 ImGui.Dummy(new Vector2(0, 2f));
-                changed |= ImGui.Checkbox($"Allow \"Backload {ProgressString.ToLower()}\"", ref AllowBackloadProgress);
-                ImGuiComponents.HelpMarker($"Enables a checkbox on the Crafting Log mini-menu. This setting ensures that {QualityString.ToLower()} is finished before starting on {ProgressString.ToLower()}. Useful for simple expert recipes where the Malleable condition might otherwise cause an early finish.");
+                changed |= ImGui.Checkbox($"允许“后置 {ProgressString.ToLower()}”", ref AllowBackloadProgress);
+                ImGuiComponents.HelpMarker($"在制作笔记迷你菜单中启用一个复选框。此设置确保在开始 {ProgressString.ToLower()} 之前先完成 {QualityString.ToLower()}。适用于简单的专家配方，否则 Malleable 条件可能导致过早完成。");
 
-                changed |= ImGui.Checkbox("Allow specialist actions when available", ref ShowSpecialistSettings);
-                ImGuiComponents.HelpMarker($"Enables checkboxes on the Crafting Log mini-menu that let the solver use {Skills.HeartAndSoul.NameOfAction()} and {Skills.QuickInnovation.NameOfAction()}.");
+                changed |= ImGui.Checkbox("允许使用专家技能（可用时）", ref ShowSpecialistSettings);
+                ImGuiComponents.HelpMarker($"在制作笔记迷你菜单中启用复选框，让求解器可以使用 {Skills.HeartAndSoul.NameOfAction()} 和 {Skills.QuickInnovation.NameOfAction()}。");
 
-                changed |= P.PluginUi.ExpertSettingsUI.SliderIntWithIcons("MaxStellarHand", ref MaxStellarHand, 0, 2, "Max [s!SteadyHand] uses per craft");
-                P.PluginUi.ExpertSettingsUI.HelpMarkerWithIcons(["This setting only applies to Cosmic Exploration recipes on missions with [s!SteadyHand].", "The Raphael solver will use UP TO this many charges depending on the recipe's difficulty."]);
+                changed |= P.PluginUi.ExpertSettingsUI.SliderIntWithIcons("MaxStellarHand", ref MaxStellarHand, 0, 2, "每次制作最大 [s!SteadyHand] 使用次数");
+                P.PluginUi.ExpertSettingsUI.HelpMarkerWithIcons(["此设置仅适用于带有 [s!SteadyHand] 任务的宇宙探索配方。", "Raphael 求解器将根据配方难度使用最多此数量的充能。"]);
 
-                changed |= ImGui.Checkbox("Fallback to another solver if Raphael is locked.", ref FallbackToSolverIfRaphaelLocked);
+                changed |= ImGui.Checkbox("如果 Raphael 被锁定，则回退到其他求解器。", ref FallbackToSolverIfRaphaelLocked);
 
-                ImGuiComponents.HelpMarker("This will prevent Raphael from being used if it is currently locked, meaning another solver will automatically be set instead.");
+                ImGuiComponents.HelpMarker("如果 Raphael 当前被锁定，将阻止其被使用，即会自动设置其他求解器。");
 
                 if (FallbackToSolverIfRaphaelLocked)
                 {
                     ImGui.Indent();
 
-                    var currentFallbackName = CraftingProcessor.GetSolverDefinitions().FirstOrDefault(x => x.Def.GetType().FullName == FallbackSolverType && x.Flavour == FallbackSolverFlavour).Name ?? "Unknown";
+                    var currentFallbackName = CraftingProcessor.GetSolverDefinitions().FirstOrDefault(x => x.Def.GetType().FullName == FallbackSolverType && x.Flavour == FallbackSolverFlavour).Name ?? "未知";
 
                     if (ImGui.BeginCombo("##fallbackSolver", currentFallbackName))
                     {
@@ -837,7 +841,7 @@ namespace Artisan.CraftingLogic.Solvers
                             if (opt.Def.GetType() == typeof(ExpertSolverDefinition)) continue;
                             if (opt.UnsupportedReason.Length > 0)
                             {
-                                ImGui.Text($"{opt.Name} is unsupported - {opt.UnsupportedReason}");
+                                ImGui.Text($"{opt.Name} 不受支持 - {opt.UnsupportedReason}");
                             }
                             else
                             {
@@ -858,7 +862,7 @@ namespace Artisan.CraftingLogic.Solvers
                 }
 
                 ImGui.Dummy(new Vector2(0, 5f));
-                if (ImGui.Button($"Clear Raphael Macro Cache (currently {P.Config.RaphaelSolverCacheV6.Count} stored)"))
+                if (ImGui.Button($"清除 Raphael 宏缓存（当前存储 {P.Config.RaphaelSolverCacheV6.Count} 个）"))
                 {
                     P.Config.RaphaelSolverCacheV6.Clear();
                     changed |= true;

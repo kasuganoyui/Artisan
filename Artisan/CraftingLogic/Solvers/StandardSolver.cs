@@ -8,19 +8,19 @@ namespace Artisan.CraftingLogic.Solvers
 {
     public class StandardSolverDefinition : ISolverDefinition
     {
-        public string MouseoverDescription { get; set; } = "This is the normal recipe solver.";
+        public string MouseoverDescription { get; set; } = "这是普通的配方求解器。";
 
         public IEnumerable<ISolverDefinition.Desc> Flavours(CraftState craft)
         {
             if (!craft.CraftExpert && (craft.CraftHQ || craft.CraftRequiredQuality > 0))
-                yield return new(this, 0, 0, "Standard Recipe Solver");
+                yield return new(this, 0, 0, "标准配方求解器");
         }
 
         public Solver Create(CraftState craft, int flavour) => new StandardSolver();
 
         public IEnumerable<ISolverDefinition.Desc> Flavours()
         {
-            yield return new(this, 0, 0, "Standard Recipe Solver");
+            yield return new(this, 0, 0, "标准配方求解器");
         }
     }
 
@@ -229,7 +229,7 @@ namespace Artisan.CraftingLogic.Solvers
                         if (Simulator.CanUseAction(craft, step, Skills.Veneration) && step.VenerationLeft == 0 && shouldUseVeneration) return new(Skills.Veneration);
                         if (Simulator.CanUseAction(craft, step, Skills.WasteNot2) && step.WasteNotLeft == 0 && !_wasteNotUsed) return new(Skills.WasteNot2);
                         if (Simulator.CanUseAction(craft, step, Skills.WasteNot) && step.WasteNotLeft == 0 && !_wasteNotUsed) return new(Skills.WasteNot);
-                        if (Simulator.CanUseAction(craft, step, Skills.FinalAppraisal) && step.FinalAppraisalLeft == 0 && CanFinishCraft(craft, step, act)) return new(Skills.FinalAppraisal, $"Synth is {act}");
+                        if (Simulator.CanUseAction(craft, step, Skills.FinalAppraisal) && step.FinalAppraisalLeft == 0 && CanFinishCraft(craft, step, act)) return new(Skills.FinalAppraisal, $"合成技能为 {act}");
                         if (!CanFinishCraft(craft, step, act))
                             return new(act);
                     }
@@ -259,7 +259,7 @@ namespace Artisan.CraftingLogic.Solvers
                     var newQuality = GreatStridesByregotCombo(craft, step);
                     var newHQPercent = maxQuality > 0 ? Calculations.GetHQChance(newQuality * 100.0 / maxQuality) : 100;
                     var newDone = craft.CraftQualityMin1 == 0 ? newHQPercent >= P.Config.MaxPercentage : newQuality >= maxQuality;
-                    if (newDone) return new(Skills.GreatStrides, "GS Combo");
+                    if (newDone) return new(Skills.GreatStrides, "阔步连击");
                 }
 
                 if (step.Condition == Condition.Poor && Simulator.CanUseAction(craft, step, Skills.CarefulObservation) && P.Config.UseSpecialist) return new(Skills.CarefulObservation);

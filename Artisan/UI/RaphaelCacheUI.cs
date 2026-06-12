@@ -20,16 +20,16 @@ namespace Artisan.UI
         {
             try
             {
-                ImGui.TextWrapped("This tab shows all of the currently saved Raphael-generated macros.");
+                ImGui.TextWrapped("此标签页显示所有当前已保存的Raphael生成的宏。");
 
                 if (Svc.ClientState.IsLoggedIn && Crafting.CurState is not Crafting.State.IdleNormal and not Crafting.State.IdleBetween)
                 {
-                    ImGui.Text($"Crafting in progress. Macro settings will be unavailable until you stop crafting.");
+                    ImGui.Text($"正在制作中，停止制作前宏设置将不可用。");
                     return;
                 }
                 ImGui.Spacing();
 
-                ImGui.TextWrapped($"Currently saved macros: {P.Config.RaphaelSolverCacheV6.Keys.Count}");
+                ImGui.TextWrapped($"已保存宏数：{P.Config.RaphaelSolverCacheV6.Keys.Count}");
                 ImGui.Spacing();
 
                 using (ImRaii.Child("##selector", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - 32f.Scale()), true))
@@ -47,7 +47,7 @@ namespace Artisan.UI
                 var filterCount = filterActive ? $"{Table.FilteredItems.Count} " : "";
 
                 if (!filterActive) ImGui.BeginDisabled();
-                if (ImGuiEx.ButtonCtrl($"Delete {filterCount}Filtered Macro{(Table.FilteredItems.Count == 1 ? "" : "s")}", new Vector2(ImGui.GetContentRegionAvail().X / 2, ImGui.GetContentRegionAvail().Y)))
+                if (ImGuiEx.ButtonCtrl($"删除 {filterCount}个筛选出的宏", new Vector2(ImGui.GetContentRegionAvail().X / 2, ImGui.GetContentRegionAvail().Y)))
                 {
                     var toDelete = Table.FilteredItems.JSONClone();
                     foreach ((RaphaelOptions key, int _) in toDelete)
@@ -61,7 +61,7 @@ namespace Artisan.UI
 
                 ImGui.SameLine();
 
-                if (ImGuiEx.ButtonCtrl($"Delete Entire Cache", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y)))
+                if (ImGuiEx.ButtonCtrl($"删除全部缓存", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y)))
                 {
                     P.Config.RaphaelSolverCacheV6.Clear();
                     P.Config.Save();

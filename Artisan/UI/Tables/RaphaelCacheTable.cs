@@ -50,23 +50,23 @@ namespace Artisan.UI.Tables
         private static float _colWidthMacroSteps;
         private static float _scale;
 
-        public readonly LevelColumn _colLevel = new() { Label = "Level" };
-        public readonly ProgressColumn _colProgress = new() { Label = "Progress" };
-        public readonly QualityColumn _colQuality = new() { Label = "Quality" };
-        public readonly DurabilityColumn _colDurability = new() { Label = "Durability" };
-        public readonly CraftsmanshipColumn _colCraftsmanship = new() { Label = "Craftsmanship" };
-        public readonly ControlColumn _colControl = new() { Label = "Control" };
+        public readonly LevelColumn _colLevel = new() { Label = "等级" };
+        public readonly ProgressColumn _colProgress = new() { Label = "进展" };
+        public readonly QualityColumn _colQuality = new() { Label = "品质" };
+        public readonly DurabilityColumn _colDurability = new() { Label = "耐久" };
+        public readonly CraftsmanshipColumn _colCraftsmanship = new() { Label = "作业精度" };
+        public readonly ControlColumn _colControl = new() { Label = "加工精度" };
         public readonly CPColumn _colCP = new() { Label = "CP" };
-        public readonly IsExpertColumn _colIsExpert = new() { Label = "Expert" };
-        public readonly InitialQualityColumn _colInitialQuality = new() { Label = "Initial Quality" };
-        public readonly SpecialistColumn _colSpecialist = new() { Label = "Specialist" };
-        public readonly SteadyHandsColumn _colSteadyHands = new() { Label = "Steady Hand" };
-        public readonly UseHeartAndSoulColumn _colUseHeartAndSoul = new() { Label = "Heart & Soul" };
-        public readonly UseQuickInnoColumn _colUseQuickInno = new() { Label = "Quick Innovation" };
-        public readonly HasManipulationColumn _colHasManipulation = new() { Label = "Manipulation" };
-        public readonly EnsureReliabilityColumn _colEnsureReliability = new() { Label = "Ensure Reliability" };
-        public readonly BackloadProgressColumn _colBackloadProgress = new() { Label = "Backload Progress" };
-        public readonly MacroStepColumn _colMacroStep = new() { Label = "Macro Step Count" };
+        public readonly IsExpertColumn _colIsExpert = new() { Label = "专家" };
+        public readonly InitialQualityColumn _colInitialQuality = new() { Label = "初始品质" };
+        public readonly SpecialistColumn _colSpecialist = new() { Label = "专家" };
+        public readonly SteadyHandsColumn _colSteadyHands = new() { Label = "稳手" };
+        public readonly UseHeartAndSoulColumn _colUseHeartAndSoul = new() { Label = "专心致志" };
+        public readonly UseQuickInnoColumn _colUseQuickInno = new() { Label = "快速革新" };
+        public readonly HasManipulationColumn _colHasManipulation = new() { Label = "掌握" };
+        public readonly EnsureReliabilityColumn _colEnsureReliability = new() { Label = "确保可靠" };
+        public readonly BackloadProgressColumn _colBackloadProgress = new() { Label = "进度后置" };
+        public readonly MacroStepColumn _colMacroStep = new() { Label = "宏步骤数" };
 
         private static float TextWidth(string text) => ImGui.CalcTextSize(text).X + ImGui.GetStyle().ItemSpacing.X;
 
@@ -82,15 +82,15 @@ namespace Artisan.UI.Tables
                 _colWidthCraftsmanship = TextWidth(_colCraftsmanship.Label) / _scale + Table.ArrowWidth;
                 _colWidthControl = TextWidth(_colControl.Label) / _scale + Table.ArrowWidth;
                 _colWidthCP = Items.Count == 0 ? 0 : Items.Max(i => TextWidth(i.MinCP.ToString())) / _scale + Table.ArrowWidth;
-                _colWidthIsExpert = TextWidth("Expert") / _scale + Table.ArrowWidth;
+                _colWidthIsExpert = TextWidth("专家") / _scale + Table.ArrowWidth;
                 _colWidthInitialQuality = TextWidth(_colInitialQuality.Label) / _scale + Table.ArrowWidth;
-                _colWidthSpecialist = TextWidth("Yes") / _scale + Table.ArrowWidth;
+                _colWidthSpecialist = TextWidth("是") / _scale + Table.ArrowWidth;
                 _colWidthSteadyHands = TextWidth("0") / _scale + Table.ArrowWidth;
-                _colWidthUseHeartAndSoul = TextWidth("Yes") / _scale + Table.ArrowWidth;
-                _colWidthUseQuickInno = TextWidth("Yes") / _scale + Table.ArrowWidth;
-                _colWidthHasManipulation = TextWidth("Yes") / _scale + Table.ArrowWidth;
-                _colWidthEnsureReliability = TextWidth("Yes") / _scale + Table.ArrowWidth;
-                _colWidthBackloadProgress = TextWidth("Yes") / _scale + Table.ArrowWidth;
+                _colWidthUseHeartAndSoul = TextWidth("是") / _scale + Table.ArrowWidth;
+                _colWidthUseQuickInno = TextWidth("是") / _scale + Table.ArrowWidth;
+                _colWidthHasManipulation = TextWidth("是") / _scale + Table.ArrowWidth;
+                _colWidthEnsureReliability = TextWidth("是") / _scale + Table.ArrowWidth;
+                _colWidthBackloadProgress = TextWidth("是") / _scale + Table.ArrowWidth;
                 _colWidthMacroSteps = TextWidth(_colMacroStep.Label) / _scale + Table.ArrowWidth;
             }
         }
@@ -189,7 +189,7 @@ namespace Artisan.UI.Tables
 
         public sealed class IsExpertColumn : ClickableColumn
         {
-            public override string ToName(RaphaelOptions m) => m.IsExpert ? "Yes" : "No";
+            public override string ToName(RaphaelOptions m) => m.IsExpert ? "是" : "否";
             public override float Width => _colWidthIsExpert * ImGuiHelpers.GlobalScale;
             public override int Compare(RaphaelOptions lhs, RaphaelOptions rhs)
             {

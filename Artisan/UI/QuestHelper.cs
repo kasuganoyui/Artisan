@@ -13,7 +13,7 @@ namespace Artisan.UI
 {
     internal class QuestHelper : Window
     {
-        public QuestHelper() : base("Quest Helper###QuestHelper", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)
+        public QuestHelper() : base("任务辅助###QuestHelper", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)
         {
             IsOpen = true;
             ShowCloseButton = false;
@@ -52,7 +52,7 @@ namespace Artisan.UI
                 bool hasIngredientsAny = QuestList.HasIngredientsForAny();
                 if (hasIngredientsAny)
                 {
-                    ImGui.Text($"Quest Helper (click to open recipe)");
+                    ImGui.Text($"任务辅助（点击打开配方）");
                     foreach (var quest in QuestList.Quests)
                     {
                         if (QuestList.IsOnQuest((ushort)quest.Key))
@@ -78,7 +78,7 @@ namespace Artisan.UI
                 bool isOnSayQuest = QuestList.IsOnSayQuest();
                 if (isOnSayQuest)
                 {
-                    ImGui.Text($"Quest Helper (click to say)");
+                    ImGui.Text($"任务辅助（点击说话）");
                     foreach (var quest in QuestManager.Instance()->DailyQuests)
                     {
                         string message = QuestList.GetSayQuestString(quest.QuestId);
@@ -94,7 +94,7 @@ namespace Artisan.UI
                 bool isOnEmoteQuest = QuestList.IsOnEmoteQuest();
                 if (isOnEmoteQuest)
                 {
-                    ImGui.Text("Quest Helper (click to target and emote)");
+                    ImGui.Text("任务辅助（点击目标并使用情感动作）");
                     foreach (var quest in QuestManager.Instance()->DailyQuests)
                     {
                         if (quest.IsCompleted) continue;

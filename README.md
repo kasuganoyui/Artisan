@@ -12,3 +12,7 @@ Repo Url:
 
 `https://love.puni.sh/ment.json`
 </div>
+
+## Artisan Mod
+
+- [CN Mod Notes](CN_MOD_NOTES.md)

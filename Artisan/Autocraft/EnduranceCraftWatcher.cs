@@ -43,8 +43,8 @@ namespace Artisan.Autocraft
                                     return;
                             }
                             Endurance.ToggleEndurance(false);
-                            Svc.Toasts.ShowError("You crafted a non-HQ item. Disabling Endurance.");
-                            DuoLog.Error("You crafted a non-HQ item. Disabling Endurance.");
+                            Svc.Toasts.ShowError("你制作出了非 HQ 物品。正在关闭耐力模式。");
+                            DuoLog.Error("你制作出了非 HQ 物品。正在关闭耐力模式。");
                         }
                     }
                 }
@@ -81,14 +81,14 @@ namespace Artisan.Autocraft
                 if (cancelled)
                 {
                     Endurance.ToggleEndurance(false);
-                    Svc.Toasts.ShowError("You've cancelled a craft. Disabling Endurance.");
-                    DuoLog.Error("You've cancelled a craft. Disabling Endurance.");
+                    Svc.Toasts.ShowError("你取消了制作。正在关闭耐力模式。");
+                    DuoLog.Error("你取消了制作。正在关闭耐力模式。");
                 }
                 else if (finalStep.Progress < craft.CraftProgress && P.Config.EnduranceStopFail)
                 {
                     Endurance.ToggleEndurance(false);
-                    Svc.Toasts.ShowError("You failed a craft. Disabling Endurance.");
-                    DuoLog.Error("You failed a craft. Disabling Endurance.");
+                    Svc.Toasts.ShowError("你制作失败了。正在关闭耐力模式。");
+                    DuoLog.Error("你制作失败了。正在关闭耐力模式。");
                 }
                 else if (P.Config.CraftingX && P.Config.CraftX > 0)
                 {

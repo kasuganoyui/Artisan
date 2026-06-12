@@ -24,7 +24,7 @@ internal class ExpertProfileEditor : Window, IDisposable
     public readonly ExpertProfile profile;
     private string profileName = "";
 
-    public ExpertProfileEditor(int profileId) : base($"Expert Settings Profile Editor###{profileId}")
+    public ExpertProfileEditor(int profileId) : base($"专家设置配置文件编辑器###{profileId}")
     {
         profile = P.Config.ExpertSolverProfiles.ExpertProfiles.First(x => x.ID == profileId);
 
@@ -59,7 +59,7 @@ internal class ExpertProfileEditor : Window, IDisposable
         bool changed = false;
         try
         {
-            ImGuiEx.TextV($"Name:");
+            ImGuiEx.TextV($"名称：");
             ImGui.SameLine(50f.Scale());
 
             profileName = profile.Name!;
@@ -70,13 +70,13 @@ internal class ExpertProfileEditor : Window, IDisposable
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            if (ImGuiEx.ButtonCtrl("Reset to Global Expert Settings"))
+            if (ImGuiEx.ButtonCtrl("重置为全局专家设置"))
             {
                 profile.Settings = P.Config.ExpertSolverConfig.JSONClone();
                 changed = true;
             }
             ImGui.SameLine();
-            if (ImGuiEx.ButtonCtrl("Reset to Artisan Default Expert Settings"))
+            if (ImGuiEx.ButtonCtrl("重置为 Artisan 默认专家设置"))
             {
                 profile.Settings = new ExpertSolverSettings();
                 changed = true;

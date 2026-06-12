@@ -57,6 +57,8 @@ public class RecipeConfig
     public uint? TempExpertMaxMaterialMiracleUses = null;
     [NonSerialized]
     public uint? TempExpertMinimumStepsBeforeMiracle = null;
+    [NonSerialized]
+    public uint? TempRaphaelMaxStellarHand = null;
 
     public string SolverType = ""; // TODO: ideally it should be a Type?, but that causes problems for serialization
     public int SolverFlavour;
@@ -66,6 +68,7 @@ public class RecipeConfig
     public uint expertMaxMaterialMiracleUses = Default;
     public uint expertMinimumStepsBeforeMiracle = Default;
     public MMSet expertUseMMWhen = MMSet.Steps;
+    public uint? raphaelMaxStellarHand = null;
 
     public uint requiredFood = Default;
     public uint requiredPotion = Default;
@@ -89,16 +92,18 @@ public class RecipeConfig
     public bool RequiredPotionHQ => TempRequiredPotion != 0 ? TempPotionHQ : (requiredPotion == Default ? P.Config.DefaultConsumables.requiredPotionHQ : requiredPotionHQ);
 
 
-    public string FoodName => requiredFood == Default && TempRequiredFood == 0 ? $"{P.Config.DefaultConsumables.FoodName} (Default)" : RequiredFood == Disabled ? "Disabled" : $"{(RequiredFoodHQ ? " " : "")}{ConsumableChecker.Food.FirstOrDefault(x => x.Id == RequiredFood).Name} (Qty: {ConsumableChecker.NumberOfConsumable(RequiredFood, RequiredFoodHQ)})";
-    public string PotionName => requiredPotion == Default && TempRequiredPotion == 0 ? $"{P.Config.DefaultConsumables.PotionName} (Default)" : RequiredPotion == Disabled ? "Disabled" : $"{(RequiredPotionHQ ? " " : "")}{ConsumableChecker.Pots.FirstOrDefault(x => x.Id == RequiredPotion).Name} (Qty: {ConsumableChecker.NumberOfConsumable(RequiredPotion, RequiredPotionHQ)})";
-    public string ManualName => requiredManual == Default && TempRequiredManual == 0 ? $"{P.Config.DefaultConsumables.ManualName} (Default)" : RequiredManual == Disabled ? "Disabled" : $"{ConsumableChecker.Manuals.FirstOrDefault(x => x.Id == RequiredManual).Name} (Qty: {ConsumableChecker.NumberOfConsumable(RequiredManual, false)})";
-    public string SquadronManualName => requiredSquadronManual == Default && TempRequiredSquadronManual == 0 ? $"{P.Config.DefaultConsumables.SquadronManualName} (Default)" : RequiredSquadronManual == Disabled ? "Disabled" : $"{ConsumableChecker.SquadronManuals.FirstOrDefault(x => x.Id == RequiredSquadronManual).Name} (Qty: {ConsumableChecker.NumberOfConsumable(RequiredSquadronManual, false)})";
+    public string FoodName => requiredFood == Default && TempRequiredFood == 0 ? $"{P.Config.DefaultConsumables.FoodName}（默认）" : RequiredFood == Disabled ? "已禁用" : $"{(RequiredFoodHQ ? " " : "")}{ConsumableChecker.Food.FirstOrDefault(x => x.Id == RequiredFood).Name}（数量：{ConsumableChecker.NumberOfConsumable(RequiredFood, RequiredFoodHQ)})";
+    public string PotionName => requiredPotion == Default && TempRequiredPotion == 0 ? $"{P.Config.DefaultConsumables.PotionName}（默认）" : RequiredPotion == Disabled ? "已禁用" : $"{(RequiredPotionHQ ? " " : "")}{ConsumableChecker.Pots.FirstOrDefault(x => x.Id == RequiredPotion).Name}（数量：{ConsumableChecker.NumberOfConsumable(RequiredPotion, RequiredPotionHQ)})";
+    public string ManualName => requiredManual == Default && TempRequiredManual == 0 ? $"{P.Config.DefaultConsumables.ManualName}（默认）" : RequiredManual == Disabled ? "已禁用" : $"{ConsumableChecker.Manuals.FirstOrDefault(x => x.Id == RequiredManual).Name}（数量：{ConsumableChecker.NumberOfConsumable(RequiredManual, false)})";
+    public string SquadronManualName => requiredSquadronManual == Default && TempRequiredSquadronManual == 0 ? $"{P.Config.DefaultConsumables.SquadronManualName}（默认）" : RequiredSquadronManual == Disabled ? "已禁用" : $"{ConsumableChecker.SquadronManuals.FirstOrDefault(x => x.Id == RequiredSquadronManual).Name}（数量：{ConsumableChecker.NumberOfConsumable(RequiredSquadronManual, false)})";
 
     public int ExpertProfileID => TempExpertProfileID ?? expertProfileID;
     public uint ExpertMaxSteadyUses => TempExpertMaxSteadyUses ?? expertMaxSteadyUses;
     public bool ExpertUseMaterialMiracle => TempExpertUseMaterialMiracle ?? (expertMaxMaterialMiracleUses > 0); // deprecated
     public uint ExpertMaxMaterialMiracleUses => TempExpertUseMaterialMiracle != null ? TempExpertUseMaterialMiracle == true ? (uint)1 : (uint)0 : TempExpertMaxMaterialMiracleUses ?? expertMaxMaterialMiracleUses;
     public uint ExpertMinimumStepsBeforeMiracle => TempExpertMinimumStepsBeforeMiracle ?? expertMinimumStepsBeforeMiracle;
+    [Newtonsoft.Json.JsonIgnore]
+    public uint? RaphaelMaxStellarHand => TempRaphaelMaxStellarHand ?? raphaelMaxStellarHand;
 
     public float GetLargestName()
     {
@@ -146,7 +151,7 @@ public class RecipeConfig
     public bool DrawFood(bool hasButton = false)
     {
         bool changed = false;
-        ImGuiEx.TextV("Food Usage:");
+        ImGuiEx.TextV("食物：");
         ImGui.SameLine(130f.Scale());
         if (hasButton) ImGuiEx.SetNextItemFullWidth(-120);
         else ImGui.PushItemWidth(GetLargestName());
@@ -154,14 +159,14 @@ public class RecipeConfig
         {
             if (this != P.Config.DefaultConsumables)
             {
-                if (ImGui.Selectable($"{P.Config.DefaultConsumables.FoodName} (Default)"))
+                if (ImGui.Selectable($"{P.Config.DefaultConsumables.FoodName}（默认）"))
                 {
                     requiredFood = Default;
                     requiredFoodHQ = false;
                     changed = true;
                 }
             }
-            if (ImGui.Selectable("Disable"))
+            if (ImGui.Selectable("禁用"))
             {
                 requiredFood = Disabled;
                 requiredFoodHQ = false;
@@ -169,7 +174,7 @@ public class RecipeConfig
             }
             foreach (var x in ConsumableChecker.GetFood(true))
             {
-                if (ImGui.Selectable($"{x.Name} (Qty: {ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
+                if (ImGui.Selectable($"{x.Name}（数量：{ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
                 {
                     requiredFood = x.Id;
                     requiredFoodHQ = false;
@@ -178,7 +183,7 @@ public class RecipeConfig
             }
             foreach (var x in ConsumableChecker.GetFood(true, true))
             {
-                if (ImGui.Selectable($" {x.Name} (Qty: {ConsumableChecker.NumberOfConsumable(x.Id, true)})"))
+                if (ImGui.Selectable($" {x.Name}（数量：{ConsumableChecker.NumberOfConsumable(x.Id, true)})"))
                 {
                     requiredFood = x.Id;
                     requiredFoodHQ = true;
@@ -193,7 +198,7 @@ public class RecipeConfig
     public bool DrawPotion(bool hasButton = false)
     {
         bool changed = false;
-        ImGuiEx.TextV("Medicine Usage:");
+        ImGuiEx.TextV("爆发药：");
         ImGui.SameLine(130f.Scale());
         if (hasButton) ImGuiEx.SetNextItemFullWidth(-120);
         else ImGui.PushItemWidth(GetLargestName());
@@ -201,14 +206,14 @@ public class RecipeConfig
         {
             if (this != P.Config.DefaultConsumables)
             {
-                if (ImGui.Selectable($"{P.Config.DefaultConsumables.PotionName} (Default)"))
+                if (ImGui.Selectable($"{P.Config.DefaultConsumables.PotionName}（默认）"))
                 {
                     requiredPotion = Default;
                     requiredPotionHQ = false;
                     changed = true;
                 }
             }
-            if (ImGui.Selectable("Disable"))
+            if (ImGui.Selectable("禁用"))
             {
                 requiredPotion = Disabled;
                 requiredPotionHQ = false;
@@ -216,7 +221,7 @@ public class RecipeConfig
             }
             foreach (var x in ConsumableChecker.GetPots(true))
             {
-                if (ImGui.Selectable($"{x.Name} (Qty: {ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
+                if (ImGui.Selectable($"{x.Name}（数量：{ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
                 {
                     requiredPotion = x.Id;
                     requiredPotionHQ = false;
@@ -225,7 +230,7 @@ public class RecipeConfig
             }
             foreach (var x in ConsumableChecker.GetPots(true, true))
             {
-                if (ImGui.Selectable($" {x.Name} (Qty: {ConsumableChecker.NumberOfConsumable(x.Id, true)})"))
+                if (ImGui.Selectable($" {x.Name}（数量：{ConsumableChecker.NumberOfConsumable(x.Id, true)})"))
                 {
                     requiredPotion = x.Id;
                     requiredPotionHQ = true;
@@ -240,7 +245,7 @@ public class RecipeConfig
     public bool DrawManual(bool hasButton = false)
     {
         bool changed = false;
-        ImGuiEx.TextV("Manual Usage:");
+        ImGuiEx.TextV("指南：");
         ImGui.SameLine(130f.Scale());
         if (hasButton) ImGuiEx.SetNextItemFullWidth(-120);
         else ImGui.PushItemWidth(GetLargestName());
@@ -248,20 +253,20 @@ public class RecipeConfig
         {
             if (this != P.Config.DefaultConsumables)
             {
-                if (ImGui.Selectable($"{P.Config.DefaultConsumables.ManualName} (Default)"))
+                if (ImGui.Selectable($"{P.Config.DefaultConsumables.ManualName}（默认）"))
                 {
                     requiredManual = Default;
                     changed = true;
                 }
             }
-            if (ImGui.Selectable("Disable"))
+            if (ImGui.Selectable("禁用"))
             {
                 requiredManual = Disabled;
                 changed = true;
             }
             foreach (var x in ConsumableChecker.GetManuals(true))
             {
-                if (ImGui.Selectable($"{x.Name} (Qty: {ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
+                if (ImGui.Selectable($"{x.Name}（数量：{ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
                 {
                     requiredManual = x.Id;
                     changed = true;
@@ -275,7 +280,7 @@ public class RecipeConfig
     public bool DrawSquadronManual(bool hasButton = false)
     {
         bool changed = false;
-        ImGuiEx.TextV("Squadron Manual:");
+        ImGuiEx.TextV("部队指南：");
         ImGui.SameLine(130f.Scale());
         if (hasButton) ImGuiEx.SetNextItemFullWidth(-120);
         else ImGui.PushItemWidth(GetLargestName());
@@ -283,20 +288,20 @@ public class RecipeConfig
         {
             if (this != P.Config.DefaultConsumables)
             {
-                if (ImGui.Selectable($"{P.Config.DefaultConsumables.SquadronManualName} (Default)"))
+                if (ImGui.Selectable($"{P.Config.DefaultConsumables.SquadronManualName}（默认）"))
                 {
                     requiredSquadronManual = Default;
                     changed = true;
                 }
             }
-            if (ImGui.Selectable("Disable"))
+            if (ImGui.Selectable("禁用"))
             {
                 requiredSquadronManual = Disabled;
                 changed = true;
             }
             foreach (var x in ConsumableChecker.GetSquadronManuals(true))
             {
-                if (ImGui.Selectable($"{x.Name} (Qty: {ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
+                if (ImGui.Selectable($"{x.Name}（数量：{ConsumableChecker.NumberOfConsumable(x.Id, false)})"))
                 {
                     requiredSquadronManual = x.Id;
                     changed = true;
@@ -335,9 +340,9 @@ public class RecipeConfig
         }
         if (string.IsNullOrEmpty(solver.Name))
         {
-            ImGuiEx.Text(ImGuiColors.DalamudRed, "Unable to select default solver. Please select from dropdown.");
+            ImGuiEx.Text(ImGuiColors.DalamudRed, "无法选择默认求解器，请从下拉列表中选择。");
         }
-        ImGuiEx.TextV($"Solver:");
+        ImGuiEx.TextV($"求解器：");
         ImGui.SameLine(130f.Scale());
         if (hasButton) ImGuiEx.SetNextItemFullWidth(-120);
 
@@ -348,7 +353,7 @@ public class RecipeConfig
                 if (opt == default) continue;
                 if (opt.UnsupportedReason.Length > 0)
                 {
-                    ImGui.Text($"{opt.Name} is unsupported - {opt.UnsupportedReason}");
+                    ImGui.Text($"{opt.Name} 不支持 - {opt.UnsupportedReason}");
                 }
                 else
                 {
@@ -377,13 +382,13 @@ public class RecipeConfig
             var expertProfile = CraftingProcessor.GetExpertProfileForRecipe(this);
             if (string.IsNullOrEmpty(expertProfile.Name))
             {
-                ImGuiEx.Text(ImGuiColors.DalamudRed, "Unable to select an expert solver profile. Please select from dropdown.");
+                ImGuiEx.Text(ImGuiColors.DalamudRed, "无法选择专家求解器配置，请从下拉列表中选择。");
             }
 
-            ImGuiEx.TextV($"Expert Profile:");
+            ImGuiEx.TextV($"专家配置：");
             ImGui.SameLine();
 
-            ImGuiEx.IconWithTooltip(new Vector4(0.5f, 0.5f, 0.5f, 1f), FontAwesomeIcon.PencilAlt, "Add or edit expert solver profiles");
+            ImGuiEx.IconWithTooltip(new Vector4(0.5f, 0.5f, 0.5f, 1f), FontAwesomeIcon.PencilAlt, "添加或编辑专家求解器配置");
             if (ImGui.IsItemHovered())
             {
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -422,15 +427,15 @@ public class RecipeConfig
         }
         if (!Crafting.EnoughDelinsForCraft(this, craft, out var req))
         {
-            ImGuiEx.TextCentered(ImGuiColors.DalamudRed, $"You do not have enough {Svc.Data.GetExcelSheet<Item>().GetRow(28724).Name} for this solver ({req} required).");
+            ImGuiEx.TextCentered(ImGuiColors.DalamudRed, $"你没有足够的 {Svc.Data.GetExcelSheet<Item>().GetRow(28724).Name} 供该求解器使用（需要 {req} 个）。");
             if (this.CurrentSolverType.Contains("Raphael"))
             {
-                ImGuiEx.TextCentered(ImGuiColors.DalamudYellow, $"An alternative solution will be used/generated when you start crafting.");
+                ImGuiEx.TextCentered(ImGuiColors.DalamudYellow, $"开始制作时将使用/生成替代方案。");
             }
         }
 
         if (ConsumableChecker.SkippingConsumablesByConfig(craft.Recipe))
-            ImGuiEx.Text(ImGuiColors.DalamudRed, "Consumables will not be used due to level difference setting.");
+            ImGuiEx.Text(ImGuiColors.DalamudRed, "由于等级差设置，将不会使用消耗品。");
     }
 
     public unsafe void DrawSimulator(CraftState craft)
@@ -442,18 +447,18 @@ public class RecipeConfig
             var solverHint = Simulator.SimulatorResult(recipe, config, craft, out var hintColor);
             var solver = CraftingProcessor.GetSolverForRecipe(config, craft);
 
-            if (solver.Name != "Expert Recipe Solver")
+            if (!solver.Def.GetType().IsAssignableTo(typeof(ExpertSolverDefinition)))
             {
-                if (craft.MissionHasMaterialMiracle && solver.Name == "Standard Recipe Solver" && P.Config.StandardMMUses > 0)
-                    ImGuiEx.TextCentered($"Material Miracle will give inconsistent simulator results.");
+                if (craft.MissionHasMaterialMiracle && solver.Def.GetType().IsAssignableTo(typeof(StandardSolverDefinition)) && P.Config.StandardMMUses > 0)
+                    ImGuiEx.TextCentered($"[s!MaterialMiracle] 会导致模拟器结果不一致。");
                 else
-                    if (solver.Name == "Raphael Recipe Solver" && !RaphaelCache.HasSolution(craft, out _))
-                        ImGuiEx.TextCentered($"Unable to generate a simulator without a Raphael solution generated.");
+                    if (solver.Def.GetType().IsAssignableTo(typeof(RaphaelSolverDefintion)) && !RaphaelCache.HasSolution(craft, out _))
+                        ImGuiEx.TextCentered($"未生成 Raphael 方案前无法生成模拟器。");
                     else
                         ImGuiEx.TextCentered(hintColor, $"[{solver.Name.Split(' ')[0].Trim(":")}] {solverHint}");
             }
             else
-                ImGuiEx.TextCentered($"[Expert] Please run this recipe in the simulator for results.");
+                ImGuiEx.TextCentered($"【专家】请在模拟器中运行此配方以查看结果。");
 
             if (ImGui.IsItemClicked())
             {
@@ -496,7 +501,7 @@ public class RecipeConfig
 
             if (ImGui.IsItemHovered())
             {
-                ImGuiEx.Tooltip($"Click to open in simulator");
+                ImGuiEx.Tooltip($"点击在模拟器中打开");
             }
 
 

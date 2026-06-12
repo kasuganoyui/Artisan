@@ -1,4 +1,4 @@
-﻿using Artisan.CraftingLogic.CraftData;
+using Artisan.CraftingLogic.CraftData;
 using Artisan.CraftingLogic.Solvers;
 using Artisan.RawInformation;
 using Artisan.RawInformation.Character;
@@ -96,14 +96,14 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
 
         ImGui.PushItemWidth(250);
-        changed |= SliderIntWithIcons("ImmacMissingDura", ref s.ImmacMissingDura, 30, 80, "Prioritize [s!ImmaculateMend] when missing this much {0}", [DurabilityString.ToLower()]);
+        changed |= SliderIntWithIcons("ImmacMissingDura", ref s.ImmacMissingDura, 30, 80, "当缺少 {0} 达到此数值时优先使用 [s!ImmaculateMend]", [DurabilityString.ToLower()]);
 
         ImGui.PushItemWidth(250);
-        changed |= SliderIntWithIcons("ManipClipTurns", ref s.ManipClipTurns, 0, 10, "Re-up [s!Manipulation] with this many turns left");
+        changed |= SliderIntWithIcons("ManipClipTurns", ref s.ManipClipTurns, 0, 10, "在还剩以下回合数时重新施加 [s!Manipulation]");
 
         ImGui.Dummy(new Vector2(0, 5f));
-        DrawIconText("Use [s!TrainedPerfection] on:");
-        HelpMarkerWithIcons(["The \"(Late)\" option will try to use [s!PreparatoryTouch] under [s!Innovation] and [s!GreatStrides].", "\"Either action\" defaults to [s!Groundwork] on a neutral {0}."], [ConditionString.ToLower()]);
+        DrawIconText("使用 [s!TrainedPerfection] 的时机：");
+        HelpMarkerWithIcons(["\"(Late)\" 选项会尝试在 [s!Innovation] 和 [s!GreatStrides] 下使用 [s!PreparatoryTouch]。", "\"Either action\" 在普通 {0} 下默认使用 [s!Groundwork]。"], [ConditionString.ToLower()]);
         ImGui.PushItemWidth(400);
         if (ImGui.BeginCombo("##midUseTPSetting", s.GetMidUseTPSettingName(s.MidUseTP)))
         {
@@ -120,34 +120,34 @@ internal class ExpertSolverSettingsUI
         if (s.MidUseTP != MidUseTPSetting.MidUseTPDuringQuality)
         {
             ImGui.PushItemWidth(150);
-            changed |= SliderIntWithIcons("MidMaxBaitStepsForTP", ref s.MidMaxBaitStepsForTP, 0, 5, "[s!Observe] this many times for better {0} during [s!TrainedPerfection] (0 to disable)", [ConditionString.ToLower()]);
-            HelpMarkerWithIcons(["Looks for [c!Malleable] for [s!Groundwork].", "Looks for [c!Good] or [c!Pliant] for [s!PreparatoryTouch]."]);
+            changed |= SliderIntWithIcons("MidMaxBaitStepsForTP", ref s.MidMaxBaitStepsForTP, 0, 5, "在 [s!TrainedPerfection] 期间使用 [s!Observe] 此次数以寻找更好的 {0}（0 为禁用）", [ConditionString.ToLower()]);
+            HelpMarkerWithIcons(["寻找 [c!Malleable] 以使用 [s!Groundwork]。", "寻找 [c!Good] 或 [c!Pliant] 以使用 [s!PreparatoryTouch]。"]);
         }
 
         ImGui.Dummy(new Vector2(0, 5f));
-        ImGui.TextWrapped($"Ishgardian Restoration");
+        ImGui.TextWrapped($"伊修加德复兴");
         ImGui.Indent();
-        changed |= ImGui.Checkbox("Max out Ishgard Restoration recipes instead of just hitting max breakpoint", ref s.MaxIshgardRecipes);
-        ImGuiComponents.HelpMarker("This will try to maximise quality to earn more Skyward points.");
+        changed |= ImGui.Checkbox("最大化伊修加德复兴配方品质，而非仅达到最大阈值", ref s.MaxIshgardRecipes);
+        ImGuiComponents.HelpMarker("这将尝试最大化品质以获得更多天穹点数。");
         ImGui.Unindent();
 
-        ImGui.TextWrapped($"Cosmic Exploration");
+        ImGui.TextWrapped($"宇宙探索");
         ImGui.Indent();
-        changed |= ImGui.Checkbox("Max out Cosmic Exploration recipes instead of hitting third breakpoint", ref s.MaxCosmicRecipes);
-        changed |= ImGui.Checkbox("Override per-recipe Cosmic Exploration settings###overrideCosmic", ref s.OverrideCosmicRecipeSettings);
-        ImGuiComponents.HelpMarker("By default, Cosmic Exploration settings are tracked for each recipe. Enable this option to instead use the settings below.");
+        changed |= ImGui.Checkbox("最大化宇宙探索配方品质，而非仅达到第三阈值", ref s.MaxCosmicRecipes);
+        changed |= ImGui.Checkbox("覆盖各配方的宇宙探索设置###overrideCosmic", ref s.OverrideCosmicRecipeSettings);
+        ImGuiComponents.HelpMarker("默认情况下，宇宙探索设置为每个配方单独保存。启用此选项将改用以下全局设置。");
         ImGui.Indent();
         if (!s.OverrideCosmicRecipeSettings) ImGui.BeginDisabled();
         ImGui.Dummy(new Vector2(0, 2f));
-        DrawIconText("[s!MaterialMiracle] usage:");
+        DrawIconText("[s!MaterialMiracle] 使用：");
         ImGui.Indent();
         ImGui.PushItemWidth(250);
-        changed |= SliderIntWithIcons("MaxMaterialMiracleUses", ref s.MaxMaterialMiracleUses, 0, 3, "Max uses per craft");
-        ImGuiComponents.HelpMarker("If being used more than once, the buff will be immediately re-applied when it runs out.");
+        changed |= SliderIntWithIcons("MaxMaterialMiracleUses", ref s.MaxMaterialMiracleUses, 0, 3, "每次制作最大使用次数");
+        ImGuiComponents.HelpMarker("如果使用次数大于一次，增益效果结束后会立即重新施加。");
         if (s.MaxMaterialMiracleUses > 0)
         {
             ImGui.PushItemWidth(250);
-            if (ImGui.BeginCombo("When to start##mmSet", s.GetMMSet(s.UseMMWhen)))
+            if (ImGui.BeginCombo("开始时机##mmSet", s.GetMMSet(s.UseMMWhen)))
             {
                 foreach (MMSet x in Enum.GetValues<MMSet>())
                 {
@@ -162,15 +162,15 @@ internal class ExpertSolverSettingsUI
             if (s.UseMMWhen == MMSet.Steps)
             {
                 ImGui.PushItemWidth(250);
-                changed |= SliderIntWithIcons("MinimumStepsBeforeMiracle", ref s.MinimumStepsBeforeMiracle, 0, 20, "Number of steps");
+                changed |= SliderIntWithIcons("MinimumStepsBeforeMiracle", ref s.MinimumStepsBeforeMiracle, 0, 20, "步骤数");
             }
         }
         ImGui.Unindent();
 
         ImGui.Dummy(new Vector2(0, 5f));
         ImGui.PushItemWidth(250);
-        changed |= SliderIntWithIcons("MaxSteadyUses", ref s.MaxSteadyUses, 0, 2, "Max [s!SteadyHand] uses per craft");
-        HelpMarkerWithIcons(["[s!SteadyHand] will be used ASAP to guarantee [s!RapidSynthesis].", "Set to 0 to disable."]);
+        changed |= SliderIntWithIcons("MaxSteadyUses", ref s.MaxSteadyUses, 0, 2, "每次制作最大 [s!SteadyHand] 使用次数");
+        HelpMarkerWithIcons(["[s!SteadyHand] 会尽快使用以确保 [s!RapidSynthesis] 成功。", "设为 0 以禁用。"]);
         if (!s.OverrideCosmicRecipeSettings) ImGui.EndDisabled();
         ImGui.Unindent();
         ImGui.Unindent();
@@ -183,7 +183,7 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
         try
         {
-            ImGui.TextWrapped($"Opener action:");
+            ImGui.TextWrapped($"起手动作：");
             ImGui.PushItemWidth(400);
             if (ImGui.BeginCombo("##OpenerAction", s.GetOpenerSet(s.OpenerAction)))
             {
@@ -201,26 +201,26 @@ internal class ExpertSolverSettingsUI
             if (s.OpenerAction != OpenerSet.MuMe)
             {
                 ImGui.Dummy(new Vector2(0, 5f));
-                changed |= CheckboxWithIcons("ReflectQuickInno", ref s.ReflectQuickInno, "Use [s!QuickInnovation] before [s!Reflect]");
+                changed |= CheckboxWithIcons("ReflectQuickInno", ref s.ReflectQuickInno, "在 [s!Reflect] 之前使用 [s!QuickInnovation]");
             }
 
             if (s.OpenerAction != OpenerSet.Reflect)
             {
                 ImGui.Dummy(new Vector2(0, 5f));
-                DrawIconText("While the [s!MuscleMemory] buff is active:");
+                DrawIconText("当 [s!MuscleMemory] 增益效果激活时：");
                 ImGui.Indent();
-                changed |= CheckboxWithIcons("MuMeIntensiveGood", ref s.MuMeIntensiveGood, "When [c!Good], prioritize [s!IntensiveSynthesis] (400%) over [s!RapidSynthesis] (500%)");
-                changed |= CheckboxWithIcons("MuMeIntensiveMalleable", ref s.MuMeIntensiveMalleable, "When [c!Malleable], use [s!HeartAndSoul] → [s!IntensiveSynthesis] (if available)");
-                changed |= CheckboxWithIcons("MuMePrimedManip", ref s.MuMePrimedManip, "When [c!Primed] and [s!Veneration] is already active, use [s!Manipulation]");
-                HelpMarkerWithIcons("If this is disabled, [s!Manipulation] will only be used during [c!Pliant] while [s!MuscleMemory] is active.");
-                changed |= CheckboxWithIcons("MuMeAllowObserve", ref s.MuMeAllowObserve, "When [c!Normal] or other irrelevant {0}, use [s!Observe] instead of [s!RapidSynthesis]", [ConditionString.ToLower()]);
-                HelpMarkerWithIcons("This saves {0} at the cost of [s!MuscleMemory] steps.", [DurabilityString.ToLower()]);
-                changed |= CheckboxWithIcons("MuMeIntensiveLastResort", ref s.MuMeIntensiveLastResort, "When 1 step left on [s!MuscleMemory] and not [c!Centered], use [s!IntensiveSynthesis] (via [s!HeartAndSoul] if necessary)");
-                HelpMarkerWithIcons("[s!RapidSynthesis] will still be used if the last step is [c!Centered].");
+                changed |= CheckboxWithIcons("MuMeIntensiveGood", ref s.MuMeIntensiveGood, "当 [c!Good] 时，优先使用 [s!IntensiveSynthesis]（400%）而非 [s!RapidSynthesis]（500%）");
+                changed |= CheckboxWithIcons("MuMeIntensiveMalleable", ref s.MuMeIntensiveMalleable, "当 [c!Malleable] 时，使用 [s!HeartAndSoul] → [s!IntensiveSynthesis]（如可用）");
+                changed |= CheckboxWithIcons("MuMePrimedManip", ref s.MuMePrimedManip, "当 [c!Primed] 且 [s!Veneration] 已激活时，使用 [s!Manipulation]");
+                HelpMarkerWithIcons("如禁用此选项，[s!Manipulation] 将在 [s!MuscleMemory] 激活期间仅在 [c!Pliant] 时使用。");
+                changed |= CheckboxWithIcons("MuMeAllowObserve", ref s.MuMeAllowObserve, "当 [c!Normal] 或其他无关 {0} 时，使用 [s!Observe] 替代 [s!RapidSynthesis]", [ConditionString.ToLower()]);
+                HelpMarkerWithIcons("这会以消耗 [s!MuscleMemory] 步骤为代价节省 {0}。", [DurabilityString.ToLower()]);
+                changed |= CheckboxWithIcons("MuMeIntensiveLastResort", ref s.MuMeIntensiveLastResort, "当 [s!MuscleMemory] 剩余 1 步且非 [c!Centered] 时，使用 [s!IntensiveSynthesis]（必要时通过 [s!HeartAndSoul]）");
+                HelpMarkerWithIcons("如果最后一步是 [c!Centered]，仍会使用 [s!RapidSynthesis]。");
 
                 ImGui.Dummy(new Vector2(0, 5f));
-                DrawIconText("Use these skills only if [s!MuscleMemory] has more than this many steps left:");
-                ImGuiComponents.HelpMarker($"The solver will still only use these skills under an appropriate {ConditionString.ToLower()}.");
+                DrawIconText("仅当 [s!MuscleMemory] 剩余步骤数超过以下值时使用这些技能：");
+                ImGuiComponents.HelpMarker($"求解器仍只会在合适的 {ConditionString.ToLower()} 下使用这些技能。");
                 // these have a minimum of 1 to avoid using a buff on the final turn of MuMe
                 ImGui.PushItemWidth(250);
                 SliderIntWithIcons("MuMeMinStepsForManip", ref s.MuMeMinStepsForManip, 1, 5, "[s!Manipulation]");
@@ -241,18 +241,18 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
         try
         {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"These settings apply after the opener, but before reaching max {Buffs.InnerQuiet.NameOfBuff()} stacks.");
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"这些设置适用于起手之后、达到最大 {Buffs.InnerQuiet.NameOfBuff()} 层数之前。");
 
             // Pre-quality dura/CP settings
             ImGui.Dummy(new Vector2(0, 5f));
-            ImGui.TextWrapped($"General");
+            ImGui.TextWrapped($"常规");
             ImGui.Indent();
 
-            changed |= CheckboxWithIcons("MidBaitPliantWithObservePreQuality", ref s.MidBaitPliantWithObservePreQuality, "When {0} is critical, use [s!Observe] to try and proc a favorable {1} for [s!Manipulation]", [DurabilityString.ToLower(), ConditionString.ToLower()]);
-            HelpMarkerWithIcons(["Fishes for [c!Pliant] (and [c!Primed] if the appropriate option is enabled.)", "If disabled, [s!Manipulation] will be used immediately regardless of {0}."], [ConditionString.ToLower()]);
+            changed |= CheckboxWithIcons("MidBaitPliantWithObservePreQuality", ref s.MidBaitPliantWithObservePreQuality, "当 {0} 告急时，使用 [s!Observe] 尝试触发有利的 {1} 以使用 [s!Manipulation]", [DurabilityString.ToLower(), ConditionString.ToLower()]);
+            HelpMarkerWithIcons(["等待 [c!Pliant]（以及 [c!Primed]，如已启用相应选项）。", "如禁用，[s!Manipulation] 将立即使用，无论 {0} 如何。"], [ConditionString.ToLower()]);
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("Use [s!Manipulation] during [c!Primed]:");
+            DrawIconText("在 [c!Primed] 时使用 [s!Manipulation]：");
             ImGui.PushItemWidth(400);
             if (ImGui.BeginCombo("##PQPrimedManip", s.GetPQPrimedManipSet(s.PQPrimedManip)))
             {
@@ -268,7 +268,7 @@ internal class ExpertSolverSettingsUI
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("Use [s!WasteNot]:");
+            DrawIconText("使用 [s!WasteNot]：");
             ImGui.PushItemWidth(300);
             if (ImGui.BeginCombo("##PQWasteNot", s.GetPQWasteNotSet(s.PQWasteNot)))
             {
@@ -286,7 +286,7 @@ internal class ExpertSolverSettingsUI
             {
                 ImGui.Indent();
                 ImGui.PushItemWidth(250);
-                changed |= SliderIntWithIcons("PQWasteNotMaxIQ", ref s.PQWasteNotMaxIQ, 0, 9, "Only at <= X {0} stacks", [Buffs.InnerQuiet.NameOfBuff()]);
+                changed |= SliderIntWithIcons("PQWasteNotMaxIQ", ref s.PQWasteNotMaxIQ, 0, 9, "仅在 <= X 层 {0} 时", [Buffs.InnerQuiet.NameOfBuff()]);
                 ImGui.Unindent();
             }
 
@@ -296,8 +296,8 @@ internal class ExpertSolverSettingsUI
             ImGui.Dummy(new Vector2(0, 5f));
             ImGui.TextWrapped($"{ProgressString}");
             ImGui.Indent();
-            DrawIconText("Ensure {0} is finished:", [ProgressString.ToLower()]);
-            HelpMarkerWithIcons(["Normally, the solver will use each {0} to advance either {1} or {2} as appropriate.", "Under [s!Innovation] at max {3} stacks, however, there are fewer opportunities for {1}.", "Use this setting to ensure {1} finishes when desired."], [ConditionString.ToLower(), ProgressString.ToLower(), QualityString.ToLower(), Buffs.InnerQuiet.NameOfBuff()]);
+            DrawIconText("确保完成 {0}：", [ProgressString.ToLower()]);
+            HelpMarkerWithIcons(["通常情况下，求解器会根据情况利用每个 {0} 推进 {1} 或 {2}。", "然而，在最大 {3} 层且使用 [s!Innovation] 时，{1} 的机会较少。", "使用此设置在需要时确保 {1} 完成。"], [ConditionString.ToLower(), ProgressString.ToLower(), QualityString.ToLower(), Buffs.InnerQuiet.NameOfBuff()]);
             ImGui.PushItemWidth(400);
             if (ImGui.BeginCombo("##whenToForceProgressSetting", s.GetWhenToForceProgressSettingName(s.WhenToForceProgress)))
             {
@@ -315,16 +315,16 @@ internal class ExpertSolverSettingsUI
             {
                 ImGui.Dummy(new Vector2(0, 3f));
                 ImGui.Indent();
-                changed |= CheckboxWithIcons("ForceProgressVene", ref s.ForceProgressVene, "Use [s!Veneration] when forcing {0} with a large progress deficit", [ProgressString.ToLower()]);
-                DrawIconText("When forcing {1}, [s!Observe] this many times for better [s!RapidSynthesis] {0}:", [ConditionString.ToLower(), ProgressString.ToLower()]);
-                HelpMarkerWithIcons("Looks for [c!Centered], [c!Sturdy]/[c!Robust], or [c!Malleable].");
+                changed |= CheckboxWithIcons("ForceProgressVene", ref s.ForceProgressVene, "在需要大幅补足 {0} 时使用 [s!Veneration]", [ProgressString.ToLower()]);
+                DrawIconText("当需要完成 {1} 时，使用 [s!Observe] 此次数以优化 [s!RapidSynthesis] 的 {0}：", [ConditionString.ToLower(), ProgressString.ToLower()]);
+                HelpMarkerWithIcons("寻找 [c!Centered]、[c!Sturdy]/[c!Robust] 或 [c!Malleable]。");
                 ImGui.PushItemWidth(250);
-                changed |= ImGui.SliderInt("(-1 for no limit, 0 to disable)##ForceProgressMaxBait", ref s.ForceProgressMaxBait, -1, 10);
+                changed |= ImGui.SliderInt("(-1 为无限制, 0 为禁用)##ForceProgressMaxBait", ref s.ForceProgressMaxBait, -1, 10);
                 ImGui.Unindent();
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("When {0} starts to run low and we need to use [s!RapidSynthesis]:", [DurabilityString.ToLower()]);
+            DrawIconText("当 {0} 开始不足且需要使用 [s!RapidSynthesis] 时：", [DurabilityString.ToLower()]);
             ImGui.PushItemWidth(400);
             if (ImGui.BeginCombo("##midKeepHighDuraSetting", s.GetMidKeepHighDuraSettingName(s.MidKeepHighDura)))
             {
@@ -340,8 +340,8 @@ internal class ExpertSolverSettingsUI
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("When [c!Good] and still working on {0}:", [ProgressString.ToLower()]);
-            HelpMarkerWithIcons("If disabled, [c!Good] will be used on [s!PreciseTouch] or [s!TricksOfTrade] (if allowed by other settings), even with {0} remaining.", [ProgressString.ToLower()]);
+            DrawIconText("当 [c!Good] 且仍在处理 {0} 时：", [ProgressString.ToLower()]);
+            HelpMarkerWithIcons("如禁用，即使仍有 {0} 剩余，[c!Good] 也会用于 [s!PreciseTouch] 或 [s!TricksOfTrade]（如其他设置允许）。", [ProgressString.ToLower()]);
             if (ImGui.BeginCombo("##midAllowIntensiveSetting", s.GetMidAllowIntensiveSettingName(s.MidAllowIntensive)))
             {
                 foreach (MidAllowIntensiveSetting x in Enum.GetValues<MidAllowIntensiveSetting>())
@@ -356,15 +356,15 @@ internal class ExpertSolverSettingsUI
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            changed |= CheckboxWithIcons("MidAllowVenerationGoodOmen", ref s.MidAllowVenerationGoodOmen, "Use [s!Veneration] during [c!GoodOmen] with large {0} deficit", [ProgressString.ToLower()]);
-            HelpMarkerWithIcons("Specifically if the upcoming [c!Good] step's [s!IntensiveSynthesis] won't max out {0} without [s!Veneration].", [ProgressString.ToLower()]);
+            changed |= CheckboxWithIcons("MidAllowVenerationGoodOmen", ref s.MidAllowVenerationGoodOmen, "当 [c!GoodOmen] 且 {0} 大幅不足时使用 [s!Veneration]", [ProgressString.ToLower()]);
+            HelpMarkerWithIcons("具体而言，当即将到来的 [c!Good] 步骤的 [s!IntensiveSynthesis] 在没有 [s!Veneration] 的情况下无法最大化 {0} 时。", [ProgressString.ToLower()]);
             ImGui.Unindent();
 
             // Pre-quality Inner Quiet settings
             ImGui.Dummy(new Vector2(0, 5f));
             ImGui.TextWrapped($"{Buffs.InnerQuiet.NameOfBuff()}");
             ImGui.Indent();
-            DrawIconText("When [c!Good], use [s!PreciseTouch]:");
+            DrawIconText("当 [c!Good] 时，使用 [s!PreciseTouch]：");
             ImGui.PushItemWidth(300);
             if (ImGui.BeginCombo("##PQGoodPrecise", s.GetPQGoodPreciseSet(s.PQGoodPrecise)))
             {
@@ -380,21 +380,21 @@ internal class ExpertSolverSettingsUI
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("Use [s!HeartAndSoul] to force [s!PreciseTouch]:");
+            DrawIconText("使用 [s!HeartAndSoul] 强制 [s!PreciseTouch]：");
             ImGui.Indent();
-            changed |= CheckboxWithIcons("MidAllowSturdyPreсise", ref s.MidAllowSturdyPreсise, "When [c!Sturdy]/[c!Robust]");
+            changed |= CheckboxWithIcons("MidAllowSturdyPreсise", ref s.MidAllowSturdyPreсise, "当 [c!Sturdy]/[c!Robust] 时");
             ImGui.PushItemWidth(250);
-            changed |= SliderIntWithIcons("MidMinIQForHSPrecise", ref s.MidMinIQForHSPrecise, 0, 10, "At this many {0} stacks (10 to disable)", [Buffs.InnerQuiet.NameOfBuff()]);
+            changed |= SliderIntWithIcons("MidMinIQForHSPrecise", ref s.MidMinIQForHSPrecise, 0, 10, "当 {0} 达到此层数时（10 为禁用）", [Buffs.InnerQuiet.NameOfBuff()]);
             ImGui.Unindent();
 
             ImGui.Dummy(new Vector2(0, 5f));
-            changed |= CheckboxWithIcons("PQAdvancedCombo", ref s.PQAdvancedCombo, "Prefer [s!Observe] → [s!AdvancedTouch] over [s!PrudentTouch]");
+            changed |= CheckboxWithIcons("PQAdvancedCombo", ref s.PQAdvancedCombo, "优先使用 [s!Observe] → [s!AdvancedTouch] 而非 [s!PrudentTouch]");
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("Use [s!HastyTouch] and [s!DaringTouch]:");
+            DrawIconText("使用 [s!HastyTouch] 和 [s!DaringTouch]：");
             ImGui.Indent();
-            changed |= CheckboxWithIcons("MidAllowCenteredHasty", ref s.MidAllowCenteredHasty, "When [c!Centered] (85% success, 10 {0})", [DurabilityString.ToLower()]);
-            changed |= CheckboxWithIcons("MidAllowSturdyHasty", ref s.MidAllowSturdyHasty, "When [c!Sturdy]/[c!Robust] (60% success, 5 {0})", [DurabilityString.ToLower()]);
+            changed |= CheckboxWithIcons("MidAllowCenteredHasty", ref s.MidAllowCenteredHasty, "当 [c!Centered] 时（85% 成功率, 10 {0}）", [DurabilityString.ToLower()]);
+            changed |= CheckboxWithIcons("MidAllowSturdyHasty", ref s.MidAllowSturdyHasty, "当 [c!Sturdy]/[c!Robust] 时（60% 成功率, 5 {0}）", [DurabilityString.ToLower()]);
             ImGui.Unindent();
 
             ImGui.Unindent();
@@ -404,12 +404,12 @@ internal class ExpertSolverSettingsUI
             ImGui.TextWrapped($"{QualityString}");
             ImGui.Indent();
 
-            DrawIconText("Use [s!Innovation] with >= X {0} stacks (10 to disable):", [Buffs.InnerQuiet.NameOfBuff()]);
+            DrawIconText("当拥有 >= X 层 {0} 时使用 [s!Innovation]（设为 10 以禁用）：", [Buffs.InnerQuiet.NameOfBuff()]);
             ImGui.Indent();
             ImGui.PushItemWidth(250);
-            changed |= SliderIntWithIcons("PQPrimedInnoIQ", ref s.PQPrimedInnoIQ, 0, 10, "On [c!Primed]");
+            changed |= SliderIntWithIcons("PQPrimedInnoIQ", ref s.PQPrimedInnoIQ, 0, 10, "在 [c!Primed] 时");
             ImGui.PushItemWidth(250);
-            changed |= SliderIntWithIcons("PQOtherInnoIQ", ref s.PQOtherInnoIQ, 0, 10, "On any other {0}", [ConditionString.ToLower()]);
+            changed |= SliderIntWithIcons("PQOtherInnoIQ", ref s.PQOtherInnoIQ, 0, 10, "在任意其他 {0} 时", [ConditionString.ToLower()]);
             ImGui.Unindent();
 
             ImGui.Unindent();
@@ -426,25 +426,25 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
         try
         {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"These settings apply after reaching max {Buffs.InnerQuiet.NameOfBuff()} stacks.");
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"此设置在达到最大 {Buffs.InnerQuiet.NameOfBuff()} 层数后生效。");
 
             // Mid-quality dura/CP settings
             ImGui.Dummy(new Vector2(0, 5f));
-            ImGui.TextWrapped($"General");
+            ImGui.TextWrapped($"常规");
             ImGui.Indent();
-            changed |= CheckboxWithIcons("MidBaitPliantWithObserveAfterIQ", ref s.MidBaitPliantWithObserveAfterIQ, "When {0} is very low, use [s!Observe] to proc a favorable {1} for restoring {0}", [DurabilityString.ToLower(), ConditionString.ToLower()]);
-            HelpMarkerWithIcons(["Fishes for [c!Pliant] (and possibly [c!Primed]).", "If disabled, actions that restore or require 0 {0} will be used immediately regardless of {1}."], [DurabilityString.ToLower(), ConditionString.ToLower()]);
-            changed |= CheckboxWithIcons("MidPrimedManipAfterIQ", ref s.MidPrimedManipAfterIQ, "Use [s!Manipulation] during [c!Primed] if enough CP is left to effectively use the restored {0}", [DurabilityString.ToLower()]);
-            changed |= CheckboxWithIcons("MidObserveGoodOmenForTricks", ref s.MidObserveGoodOmenForTricks, "On [c!GoodOmen], prioritize [s!Observe] → [s!TricksOfTrade] when not under buffs");
-            HelpMarkerWithIcons(["If disabled, the solver will prioritize a buff skill and spend the [c!Good] turn on {0} or {1}.", "Enabling this option is generally more efficient."], [ProgressString.ToLower(), QualityString.ToLower()]);
+            changed |= CheckboxWithIcons("MidBaitPliantWithObserveAfterIQ", ref s.MidBaitPliantWithObserveAfterIQ, "当 {0} 非常低时，使用 [s!Observe] 触发有利的 {1} 以恢复 {0}", [DurabilityString.ToLower(), ConditionString.ToLower()]);
+            HelpMarkerWithIcons(["刷取 [c!Pliant]（也可能刷出 [c!Primed]）。", "如果禁用，将立即使用恢复或需要 0 {0} 的行动，无论 {1} 如何。"], [DurabilityString.ToLower(), ConditionString.ToLower()]);
+            changed |= CheckboxWithIcons("MidPrimedManipAfterIQ", ref s.MidPrimedManipAfterIQ, "在 [c!Primed] 时使用 [s!Manipulation]，前提是剩余 CP 足够有效利用恢复的 {0}", [DurabilityString.ToLower()]);
+            changed |= CheckboxWithIcons("MidObserveGoodOmenForTricks", ref s.MidObserveGoodOmenForTricks, "在 [c!GoodOmen] 时，无增益状态下优先使用 [s!Observe] → [s!TricksOfTrade]");
+            HelpMarkerWithIcons(["如果禁用，求解器会优先使用增益技能，将 [c!Good] 回合用于 {0} 或 {1}。", "启用此选项通常效率更高。"], [ProgressString.ToLower(), QualityString.ToLower()]);
             ImGui.Unindent();
 
             // Mid-quality progress settings
             ImGui.Dummy(new Vector2(0, 5f));
             ImGui.TextWrapped($"{ProgressString}");
             ImGui.Indent();
-            changed |= CheckboxWithIcons("MidAllowVenerationAfterIQ", ref s.MidAllowVenerationAfterIQ, "Use [s!Veneration] with large {0} deficit", [ProgressString.ToLower()]);
-            HelpMarkerWithIcons(["Specifically if a single [s!IntensiveSynthesis] couldn't finish the craft without [s!Veneration], even this late in the craft.", "Overridden by the \"Prioritize {0}\" setting, if enabled."], [ProgressString.ToLower()]);
+            changed |= CheckboxWithIcons("MidAllowVenerationAfterIQ", ref s.MidAllowVenerationAfterIQ, "在 {0} 大幅不足时使用 [s!Veneration]", [ProgressString.ToLower()]);
+            HelpMarkerWithIcons(["特指当即使到了制作后期，不使用 [s!Veneration] 时单次 [s!IntensiveSynthesis] 也无法完成制作的情况。", "如果启用了「优先 {0}」设置，则以此为准。"], [ProgressString.ToLower()]);
             ImGui.Unindent();
 
             // Mid-quality action settings
@@ -452,20 +452,20 @@ internal class ExpertSolverSettingsUI
             ImGui.TextWrapped($"{QualityString}");
             ImGui.Indent();
 
-            DrawIconText("Use [s!PreparatoryTouch]:");
+            DrawIconText("使用 [s!PreparatoryTouch]：");
             ImGui.Indent();
-            changed |= CheckboxWithIcons("MidAllowGoodPrep", ref s.MidAllowGoodPrep, "Under [c!Good] + [s!Innovation] + [s!GreatStrides]");
-            HelpMarkerWithIcons("Less efficient than [s!PreciseTouch], despite the big quality bump.");
-            changed |= CheckboxWithIcons("MidAllowSturdyPrep", ref s.MidAllowSturdyPrep, "Under [c!Sturdy]/[c!Robust] + [s!Innovation]");
+            changed |= CheckboxWithIcons("MidAllowGoodPrep", ref s.MidAllowGoodPrep, "在 [c!Good] + [s!Innovation] + [s!GreatStrides] 下");
+            HelpMarkerWithIcons("即使品质提升较大，效率仍低于 [s!PreciseTouch]。");
+            changed |= CheckboxWithIcons("MidAllowSturdyPrep", ref s.MidAllowSturdyPrep, "在 [c!Sturdy]/[c!Robust] + [s!Innovation] 下");
             ImGui.Unindent();
 
             ImGui.Dummy(new Vector2(0, 5f));
-            changed |= CheckboxWithIcons("MidGSBeforeInno", ref s.MidGSBeforeInno, "Use [s!GreatStrides] before non-finisher {0} combos", [QualityString.ToLower()]);
-            HelpMarkerWithIcons(["ex. [s!Innovation] → [s!Observe] → [s!AdvancedTouch].", "Enabling this uses more CP but less {0}, and may help avoid a usage of an expensive {0}-related action."], [DurabilityString.ToLower()]);
+            changed |= CheckboxWithIcons("MidGSBeforeInno", ref s.MidGSBeforeInno, "在非收尾的 {0} 连招前使用 [s!GreatStrides]", [QualityString.ToLower()]);
+            HelpMarkerWithIcons(["例如：[s!Innovation] → [s!Observe] → [s!AdvancedTouch]。", "启用此选项会消耗更多 CP 但节省 {0}，可能有助于避免使用一次昂贵的 {0} 相关技能。"], [DurabilityString.ToLower()]);
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("When [c!Good] and only [s!GreatStrides] is up:");
-            HelpMarkerWithIcons(["\"Free\" [s!PreparatoryTouch] refers to [s!TrainedPerfection], which can be enabled in the Pre-{0} settings.", "Saving [s!QuickInnovation] for an emergency [s!ByregotsBlessing] in the finisher is the most efficient, but might not be necessary."], [QualityString]);
+            DrawIconText("当 [c!Good] 且只有 [s!GreatStrides] 生效时：");
+            HelpMarkerWithIcons(["「免费」[s!PreparatoryTouch] 指 [s!TrainedPerfection]，可在 Pre-{0} 设置中启用。", "保留 [s!QuickInnovation] 用于收尾阶段紧急使用 [s!ByregotsBlessing] 效率最高，但可能并非必需。"], [QualityString]);
             ImGui.PushItemWidth(350);
             if (ImGui.BeginCombo("##midAllowQuickInnoGoodSetting", s.GetQQuickInnoGoodSet(s.QQuickInnoGood)))
             {
@@ -493,22 +493,22 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
         try
         {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"These settings apply when close to max {QualityString.ToLower()} or when running out of other options.");
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"此设置在接近最高 {QualityString.ToLower()} 或其他选项用尽时生效。");
 
             ImGui.Dummy(new Vector2(0, 5f));
-            DrawIconText("Use [s!CarefulObservation] to try and proc [c!Good]:");
+            DrawIconText("使用 [s!CarefulObservation] 尝试触发 [c!Good]：");
             ImGui.Indent();
-            changed |= CheckboxWithIcons("FinisherBaitGoodByregot", ref s.FinisherBaitGoodByregot, "For [s!ByregotsBlessing] as a makeshift [s!GreatStrides]");
-            HelpMarkerWithIcons("Invoked when [s!GreatStrides] + [s!ByregotsBlessing] would get us there, but we don't have enough CP for [s!GreatStrides] or standard [s!Observe].");
-            changed |= CheckboxWithIcons("EmergencyCPBaitGood", ref s.EmergencyCPBaitGood, "For [s!TricksOfTrade] if really low on CP");
-            HelpMarkerWithIcons("Invoked when totally out of other options and even [s!ByregotsBlessing] wouldn't be enough {0}.", [QualityString.ToLower()]);
+            changed |= CheckboxWithIcons("FinisherBaitGoodByregot", ref s.FinisherBaitGoodByregot, "为 [s!ByregotsBlessing] 充当临时的 [s!GreatStrides]");
+            HelpMarkerWithIcons("当 [s!GreatStrides] + [s!ByregotsBlessing] 足以完成，但没有足够 CP 使用 [s!GreatStrides] 或常规 [s!Observe] 时触发。");
+            changed |= CheckboxWithIcons("EmergencyCPBaitGood", ref s.EmergencyCPBaitGood, "用于 CP 极低时的 [s!TricksOfTrade]");
+            HelpMarkerWithIcons("当完全没有其他选项，且即使 [s!ByregotsBlessing] 也不足以达到 {0} 时触发。", [QualityString.ToLower()]);
             ImGui.Unindent();
 
             ImGui.Dummy(new Vector2(0, 5f));
-            changed |= CheckboxWithIcons("FinisherUseQuickInno", ref s.FinisherUseQuickInno, "Use [s!QuickInnovation] to finish when low on CP");
-            HelpMarkerWithIcons("When there's not enough CP to use [s!Innovation] and/or [s!GreatStrides], but [s!QuickInnovation] is enough to reach the {0} goal.", [QualityString.ToLower()]);
-            changed |= CheckboxWithIcons("RapidSynthYoloAllowed", ref s.RapidSynthYoloAllowed, "Allow finishing with [s!RapidSynthesis] when out of options");
-            ImGuiComponents.HelpMarker($"If disabled, the solver will do nothing instead, which may interrupt AFK expert crafting. Usually safe to enable, as it will only be invoked with no CP or {DurabilityString.ToLower()} left.");
+            changed |= CheckboxWithIcons("FinisherUseQuickInno", ref s.FinisherUseQuickInno, "在 CP 不足时使用 [s!QuickInnovation] 完成制作");
+            HelpMarkerWithIcons("当没有足够 CP 使用 [s!Innovation] 和/或 [s!GreatStrides]，但 [s!QuickInnovation] 足以达到 {0} 目标时。", [QualityString.ToLower()]);
+            changed |= CheckboxWithIcons("RapidSynthYoloAllowed", ref s.RapidSynthYoloAllowed, "允许在无其他选项时使用 [s!RapidSynthesis] 完成制作");
+            ImGuiComponents.HelpMarker($"如果禁用，求解器将什么都不做，可能会中断挂机专家制作。通常可以安全启用，因为只有在没有 CP 或 {DurabilityString.ToLower()} 剩余时才会触发。");
         }
         catch (Exception ex)
         {
@@ -522,34 +522,34 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
 
         ImGuiTreeNodeFlags flags = startOpen ? ImGuiTreeNodeFlags.DefaultOpen : ImGuiTreeNodeFlags.None;
-        if (ImGui.CollapsingHeader("General", flags))
+        if (ImGui.CollapsingHeader("常规", flags))
         {
             ImGui.Dummy(new Vector2(0, 5f));
             changed |= DrawGeneralSettings(s);
             ImGui.Dummy(new Vector2(0, 5f));
         }
-        if (ImGui.CollapsingHeader("Opener", flags))
+        if (ImGui.CollapsingHeader("起手", flags))
         {
             ImGui.Dummy(new Vector2(0, 5f));
             changed |= DrawOpenerSettings(s);
             ImGui.Dummy(new Vector2(0, 5f));
         }
 
-        if (ImGui.CollapsingHeader($"Main Rotation - Pre-{QualityString} Phase", flags))
+        if (ImGui.CollapsingHeader($"主要循环 - Pre-{QualityString} 阶段", flags))
         {
             ImGui.Dummy(new Vector2(0, 5f));
             changed |= DrawPreQualitySettings(s);
             ImGui.Dummy(new Vector2(0, 5f));
         }
 
-        if (ImGui.CollapsingHeader($"Main Rotation - {QualityString} Phase", flags))
+        if (ImGui.CollapsingHeader($"主要循环 - {QualityString} 阶段", flags))
         {
             ImGui.Dummy(new Vector2(0, 5f));
             changed |= DrawQualitySettings(s);
             ImGui.Dummy(new Vector2(0, 5f));
         }
 
-        if (ImGui.CollapsingHeader($"Finisher", flags))
+        if (ImGui.CollapsingHeader($"收尾", flags))
         {
             ImGui.Dummy(new Vector2(0, 5f));
             changed |= DrawFinisherSettings(s);
@@ -557,10 +557,10 @@ internal class ExpertSolverSettingsUI
 
 #if DEBUG
         ImGui.Dummy(new Vector2(0, 5f));
-        changed |= ImGui.Checkbox("DEBUG: Observe only###debugObserve", ref s.DebugObserveOnly);
-        HelpMarkerWithIcons("CAUTION: Will only spam [s!Observe] and [s!TricksOfTrade] to collect condition data.");
-        changed |= ImGui.Checkbox("DEBUG: Innovation only###debugInnovate", ref s.DebugInnovateOnly);
-        HelpMarkerWithIcons("CAUTION: Will only spam [s!Innovation] to collect condition data. Faster than [s!Observe].");
+        changed |= ImGui.Checkbox("调试：仅观察###debugObserve", ref s.DebugObserveOnly);
+        HelpMarkerWithIcons("注意：只会连续使用 [s!Observe] 和 [s!TricksOfTrade] 以收集条件数据。");
+        changed |= ImGui.Checkbox("调试：仅改革###debugInnovate", ref s.DebugInnovateOnly);
+        HelpMarkerWithIcons("注意：只会连续使用 [s!Innovation] 以收集条件数据。比 [s!Observe] 更快。");
 #endif
 
         return changed;
@@ -571,19 +571,19 @@ internal class ExpertSolverSettingsUI
         bool changed = false;
         try
         {
-            ImGui.TextWrapped($"The expert recipe solver is not an alternative to the standard solver. This is used exclusively with expert recipes.");
+            ImGui.TextWrapped($"专家配方求解器并非标准求解器的替代品。此求解器仅用于专家配方。");
             if (expertIcon != null)
             {
-                ImGui.TextWrapped($"This solver only applies to recipes with the");
+                ImGui.TextWrapped($"此求解器仅适用于制作笔记中带有");
                 ImGui.SameLine();
                 ImGui.Image(expertIcon.Handle, expertIcon.Size, new Vector2(0, 0), new Vector2(1, 1), new Vector4(0.94f, 0.57f, 0f, 1f));
                 ImGui.SameLine();
-                ImGui.TextWrapped($"icon in the crafting log.");
+                ImGui.TextWrapped($"图标的配方。");
             }
 
             ImGui.Dummy(new Vector2(0, 5f));
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"IMPORTANT: These settings have been selected for optimal performance. Changing them may make the solver significantly worse. Use at your own risk.");
-            if (ImGui.Checkbox("I understand, let me in", ref P.Config.AcknowledgeExpertSettings))
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudYellow, $"重要提示：这些设置已为最佳性能选定。更改它们可能导致求解器性能显著下降。请自行承担风险。");
+            if (ImGui.Checkbox("我了解，让我进入", ref P.Config.AcknowledgeExpertSettings))
             {
                 P.Config.Save();
             }
@@ -597,14 +597,14 @@ internal class ExpertSolverSettingsUI
                 ImGui.Unindent();
 
                 ImGui.Indent();
-                ImGui.TextWrapped($"Expert Profiles");
+                ImGui.TextWrapped($"专家配置文件");
                 ImGui.Indent();
-                changed |= ImGui.Checkbox("Use expert solver profiles", ref s.EnableExpertProfiles);
-                ImGuiComponents.HelpMarker("Profiles let you set different expert solver settings for different recipes. This is for advanced users - the expert solver should \"just work\" for almost everything.");
+                changed |= ImGui.Checkbox("使用专家求解器配置文件", ref s.EnableExpertProfiles);
+                ImGuiComponents.HelpMarker("配置文件让你可以为不同配方设置不同的专家求解器设置。此功能面向高级用户——专家求解器在大多数情况下应能「开箱即用」。");
 
                 if (s.EnableExpertProfiles)
                 {
-                    if (IconButtons.IconTextButton(Dalamud.Interface.FontAwesomeIcon.ExternalLinkAlt, "Create/Edit Expert Solver Profiles"))
+                    if (IconButtons.IconTextButton(Dalamud.Interface.FontAwesomeIcon.ExternalLinkAlt, "创建/编辑专家求解器配置文件"))
                     {
                         P.PluginUi.OpenWindow = OpenWindow.ExpertProfiles;
                     }
@@ -612,7 +612,7 @@ internal class ExpertSolverSettingsUI
                 ImGui.Unindent();
 
                 ImGui.Dummy(new Vector2(0, 5f));
-                if (ImGuiEx.ButtonCtrl("Reset Expert Solver Settings To Default"))
+                if (ImGuiEx.ButtonCtrl("将专家求解器设置重置为默认值"))
                 {
                     P.Config.ExpertSolverConfig = new();
                     changed |= true;

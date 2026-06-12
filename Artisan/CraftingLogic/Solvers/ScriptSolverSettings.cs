@@ -64,7 +64,7 @@ public class ScriptSolverSettings
     {
         try
         {
-            ImGui.TextWrapped($"This is a very advanced feature, aimed at users wishing to create their own dynamic solvers using C#. Please visit the github source code and view the Demoscripts folder for an example. No support will be given as to learning C# to do this.");
+            ImGui.TextWrapped($"这是一个非常高级的功能，适合希望使用 C# 创建自定义动态求解器的用户。请访问 GitHub 源代码并查看 Demoscripts 文件夹中的示例。我们不提供学习 C# 的相关支持。");
             ImGui.Separator();
             Script? toDel = null;
             foreach (var s in Scripts)
@@ -76,26 +76,26 @@ public class ScriptSolverSettings
                 using (ImRaii.Disabled(state == CompilationState.InProgress))
                 {
                     // TODO: show icon depending on state...
-                    if (ImGui.Button($"Recompile: {state}", new(100, 0)))
+                    if (ImGui.Button($"重新编译：{state}", new(100, 0)))
                         _compiler.Recompile(s);
                     if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                     {
                         ImGui.BeginTooltip();
-                        ImGui.TextUnformatted($"Compilation output:\n{s.CompilationOutput()}");
+                        ImGui.TextUnformatted($"编译输出：\n{s.CompilationOutput()}");
                         ImGui.EndTooltip();
                     }
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Delete"))
+                if (ImGui.Button("删除"))
                     toDel = s;
                 ImGui.SameLine();
                 ImGui.TextUnformatted($"[{s.ID}] {s.SourcePath}");
             }
 
-            ImGui.InputText("New script path", ref _newPath, 256);
+            ImGui.InputText("新脚本路径", ref _newPath, 256);
             ImGui.SameLine();
-            if (ImGui.Button("Add") && _newPath.Length > 0 && !Scripts.Any(s => s.SourcePath == _newPath))
+            if (ImGui.Button("添加") && _newPath.Length > 0 && !Scripts.Any(s => s.SourcePath == _newPath))
             {
                 AddNewScript(new(_newPath));
                 _newPath = "";
@@ -104,7 +104,7 @@ public class ScriptSolverSettings
 
             if (toDel != null)
             {
-                toDel.UpdateCompilation(CompilationState.Deleted, "Deletion in progress", null);
+                toDel.UpdateCompilation(CompilationState.Deleted, "正在删除", null);
                 Scripts.Remove(toDel);
                 return true;
             }

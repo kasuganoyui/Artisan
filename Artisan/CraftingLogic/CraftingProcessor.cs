@@ -131,7 +131,7 @@ public static class CraftingProcessor
         // we don't want any solvers running with broken gear
         if (RepairManager.GetMinEquippedPercent() == 0)
         {
-            SolverFailed?.Invoke(recipe, "You have broken gear");
+            SolverFailed?.Invoke(recipe, "装备已损坏");
             _activeSolver = null;
             ActiveSolver = new("");
             return;
@@ -150,7 +150,7 @@ public static class CraftingProcessor
             _activeSolver = autoSolver.CreateSolver(craft);
             if (_activeSolver is null)
             {
-                SolverFailed?.Invoke(recipe, "No active solver selected.");
+                SolverFailed?.Invoke(recipe, "未选择求解器。");
                 return;
             }
             if (_activeSolver.GetType().FullName.Contains("Expert"))
@@ -168,7 +168,7 @@ public static class CraftingProcessor
             var validation = validator.Validate(craft);
             if (!validation)
             {
-                SolverFailed?.Invoke(recipe, "You have mismatched stats");
+                SolverFailed?.Invoke(recipe, "属性不匹配");
                 _activeSolver = null;
                 ActiveSolver = new("");
                 return;
@@ -179,7 +179,7 @@ public static class CraftingProcessor
 
         _nextRec = _activeSolver.Solve(craft, initialStep);
         if (Simulator.CannotUseAction(craft, initialStep, _nextRec.Action, out string reason))
-            DuoLog.Error($"Unable to use {_nextRec.Action.NameOfAction()}: {reason}");
+            DuoLog.Error($"无法使用 {_nextRec.Action.NameOfAction()}: {reason}");
         if (_nextRec.Action != Skills.None)
             RecommendationReady?.Invoke(recipe, ActiveSolver, craft, initialStep, _nextRec);
     }
@@ -200,7 +200,7 @@ public static class CraftingProcessor
         _nextRec = _activeSolver.Solve(craft, step);
         Svc.Log.Debug($"Next rec is: {_nextRec.Action} on {_nextRec.Comment}");
         if (Simulator.CannotUseAction(craft, step, _nextRec.Action, out string reason))
-            DuoLog.Error($"Unable to use {_nextRec.Action.NameOfAction()}: {reason}");
+            DuoLog.Error($"无法使用 {_nextRec.Action.NameOfAction()}: {reason}");
         if (_nextRec.Action != Skills.None)
             RecommendationReady?.Invoke(recipe, ActiveSolver, craft, step, _nextRec);
     }

@@ -146,13 +146,13 @@ public unsafe static class PreCrafting
             // handle errors when we're forbidden from rectifying them automatically
             if (P.Config.DontEquipItems && needClassChange)
             {
-                DuoLog.Error($"Can't craft {recipe.ItemResult.Value.Name.ToDalamudString()}: wrong class, {requiredClass} needed");
+                DuoLog.Error($"无法制作 {recipe.ItemResult.Value.Name.ToDalamudString()}：职业错误，需要 {requiredClass}");
                 PauseOrDisableModes();
                 return;
             }
             if (P.Config.DontEquipItems && needEquipItem)
             {
-                DuoLog.Error($"Can't craft {recipe.ItemResult.Value.Name.ToDalamudString()}: required item {recipe.ItemRequired.Value.Name} not equipped");
+                DuoLog.Error($"无法制作 {recipe.ItemResult.Value.Name.ToDalamudString()}：所需物品 {recipe.ItemRequired.Value.Name} 未装备");
                 PauseOrDisableModes();
                 return;
             }
@@ -180,7 +180,7 @@ public unsafe static class PreCrafting
             {
                 List<string> missingIngredients = MissingIngredients(recipe);
 
-                DuoLog.Error($"Not all ingredients for {recipe.ItemResult.Value.Name.ToDalamudString()} found.\r\nMissing: {string.Join(", ", missingIngredients)}");
+                DuoLog.Error($"未找到 {recipe.ItemResult.Value.Name.ToDalamudString()} 的全部材料。\r\n缺少：{string.Join(", ", missingIngredients)}");
                 return;
             }
 
@@ -236,7 +236,7 @@ public unsafe static class PreCrafting
     {
         List<string> missingConsumables = MissingConsumables(config);
 
-        DuoLog.Error($"Can't craft {recipe.ItemResult.Value.Name.ToDalamudString()}: required consumables not up and missing {string.Join(", ", missingConsumables)}");
+        DuoLog.Error($"无法制作 {recipe.ItemResult.Value.Name.ToDalamudString()}：所需消耗品未生效，缺少 {string.Join(", ", missingConsumables)}");
     }
 
     internal static bool NeedsConsumablesCheck(CraftType type, RecipeConfig? config, Recipe recipe)
@@ -364,7 +364,7 @@ public unsafe static class PreCrafting
 
         if (equipGearsetLoops >= 5)
         {
-            DuoLog.Error("Unable to switch gearsets.");
+            DuoLog.Error("无法切换套装。");
             return TaskResult.Abort;
         }
 
@@ -397,7 +397,7 @@ public unsafe static class PreCrafting
             }
         }
 
-        DuoLog.Error($"Failed to find gearset for {job}");
+        DuoLog.Error($"未找到 {job} 的套装");
         return TaskResult.Abort;
     }
 
@@ -412,7 +412,7 @@ public unsafe static class PreCrafting
         var pos = FindItemInInventory(ItemId, [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4, InventoryType.ArmoryMainHand, InventoryType.ArmoryHands]);
         if (pos == null)
         {
-            DuoLog.Error($"Failed to find item {itemSheet.Name} (ID: {ItemId}) in inventory");
+            DuoLog.Error($"在背包中未找到物品 {itemSheet.Name}（ID: {ItemId}）");
             Endurance.ToggleEndurance(false);
             if (CraftingListUI.Processing)
                 CraftingListFunctions.Paused = true;
@@ -616,6 +616,6 @@ public unsafe static class PreCrafting
         if (recipe != null)
             StartCrafting(recipe.Value, eventParam is 14 ? CraftType.Normal : eventParam is 15 ? CraftType.Quick : CraftType.Trial);
         else
-            DuoLog.Error($"Somehow recipe is null. Please report this on the Discord.");
+            DuoLog.Error($"配方为空。请在 Discord 上报告此问题。");
     }
 }

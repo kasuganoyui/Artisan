@@ -21,7 +21,7 @@ namespace Artisan.UI
     {
         private static string _newMacroName = string.Empty;
         private static bool _keyboardFocus;
-        private const string MacroNamePopupLabel = "Macro Name";
+        private const string MacroNamePopupLabel = "宏名称";
         private static bool reorderMode = false;
 
         private static List<int> quickAssignPossibleDifficulties = new();
@@ -39,19 +39,19 @@ namespace Artisan.UI
         {
             try
             {
-                ImGui.TextWrapped("This tab will allow you to add macros that Artisan can use instead of its own decisions. Once you create a new macro, click on it from the list below to open up the macro editor window for your macro.");
+                ImGui.TextWrapped("此标签页允许您添加 Artisan 可使用的宏，以替代其自身决策。创建新宏后，从下方列表中点击它以打开宏编辑器窗口。");
                 ImGui.Separator();
 
                 if (Svc.ClientState.IsLoggedIn && Crafting.CurState is not Crafting.State.IdleNormal and not Crafting.State.IdleBetween)
                 {
-                    ImGui.Text($"Crafting in progress. Macro settings will be unavailable until you stop crafting.");
+                    ImGui.Text($"制作进行中。停止制作前宏设置将不可用。");
                     return;
                 }
                 ImGui.Spacing();
-                if (ImGui.Button("Import Macro From Clipboard"))
+                if (ImGui.Button("从剪贴板导入宏"))
                     OpenMacroNamePopup(MacroNameUse.FromClipboard);
 
-                if (ImGui.Button("Import Macro From Clipboard (Artisan Export)"))
+                if (ImGui.Button("从剪贴板导入宏（Artisan 导出）"))
                 {
                     try
                     {
@@ -65,11 +65,11 @@ namespace Artisan.UI
                     catch (Exception ex)
                     {
                         ex.Log();
-                        Notify.Error("Unable to import.");
+                        Notify.Error("无法导入。");
                     }
                 }
 
-                if (ImGui.Button("New Macro"))
+                if (ImGui.Button("新建宏"))
                     OpenMacroNamePopup(MacroNameUse.NewMacro);
 
                 DrawMacroNamePopup(MacroNameUse.FromClipboard);
@@ -78,14 +78,14 @@ namespace Artisan.UI
                 if (P.Config.MacroSolverConfig.Macros.Count > 0)
                 {
                     if (P.Config.MacroSolverConfig.Macros.Count > 1)
-                        ImGui.Checkbox("Reorder Mode (Click and Drag to Reorder)", ref reorderMode);
+                        ImGui.Checkbox("重新排序模式（点击拖拽排序）", ref reorderMode);
                     else
                         reorderMode = false;
 
                     if (reorderMode)
-                        ImGuiEx.CenterColumnText("Reorder Mode");
+                        ImGuiEx.CenterColumnText("重新排序模式");
                     else
-                        ImGuiEx.CenterColumnText("Macro Editor Select");
+                        ImGuiEx.CenterColumnText("宏编辑器选择");
 
                     if (ImGui.BeginChild("##selector", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), true))
                     {
@@ -93,7 +93,7 @@ namespace Artisan.UI
                         {
                             var m = P.Config.MacroSolverConfig.Macros[i];
                             int cpCost = GetCPCost(m);
-                            var selected = ImGui.Selectable($"{m.Name} (CP Cost: {cpCost}) (ID: {m.ID})###{m.ID}");
+                            var selected = ImGui.Selectable($"{m.Name}（CP 消耗：{cpCost}）（ID：{m.ID}）###{m.ID}");
 
                             if (ImGui.IsItemActive() && !ImGui.IsItemHovered() && reorderMode)
                             {
@@ -198,7 +198,7 @@ namespace Artisan.UI
                     _keyboardFocus = false;
                 }
 
-                if (ImGui.InputText("Macro Name##macroName", ref _newMacroName, 64, ImGuiInputTextFlags.EnterReturnsTrue) && _newMacroName.Any())
+                if (ImGui.InputText("宏名称##macroName", ref _newMacroName, 64, ImGuiInputTextFlags.EnterReturnsTrue) && _newMacroName.Any())
                 {
                     switch (use)
                     {
@@ -220,11 +220,11 @@ namespace Artisan.UI
                                     macro.Steps = steps;
                                     P.Config.MacroSolverConfig.AddNewMacro(macro);
                                     P.Config.Save();
-                                    DuoLog.Information($"{macro.Name} has been saved.");
+                                    DuoLog.Information($"{macro.Name} 已保存。");
                                 }
                                 else
                                 {
-                                    DuoLog.Error("Unable to parse clipboard. Please check your clipboard contains a working macro with actions.");
+                                    DuoLog.Error("无法解析剪贴板。请检查您的剪贴板包含一个包含有效操作的宏。");
                                 }
                             }
                             catch (Exception e)
@@ -288,7 +288,7 @@ namespace Artisan.UI
                         act = Enum.GetValues(typeof(Skills)).Cast<Skills>().FirstOrDefault(s => s.NameOfAction(raphParseEN).Replace(" ", "").Replace("'", "").Equals(action, StringComparison.CurrentCultureIgnoreCase));
                         if (act == default)
                         {
-                            DuoLog.Error($"Unable to parse action: {action}");
+                            DuoLog.Error($"无法解析操作：{action}");
                             continue;
                         }
                     }

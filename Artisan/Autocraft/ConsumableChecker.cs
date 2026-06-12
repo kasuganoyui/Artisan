@@ -189,8 +189,8 @@ namespace Artisan.Autocraft
                 {
                     if (Endurance.Enable)
                     {
-                        Svc.Toasts.ShowError("Food not found. Disabling Endurance.");
-                        DuoLog.Error("Food not found. Disabling Endurance.");
+                        Svc.Toasts.ShowError("未找到食物。正在禁用耐力模式。");
+                        DuoLog.Error("未找到食物。正在禁用耐力模式。");
                         Endurance.ToggleEndurance(false);
                     }
                     fooded = !P.Config.AbortIfNoFoodPot;
@@ -208,8 +208,8 @@ namespace Artisan.Autocraft
                 {
                     if (Endurance.Enable)
                     {
-                        Svc.Toasts.ShowError("Potion not found. Disabling Endurance.");
-                        DuoLog.Error("Potion not found. Disabling Endurance.");
+                        Svc.Toasts.ShowError("未找到爆发药。正在禁用耐力模式。");
+                        DuoLog.Error("未找到爆发药。正在禁用耐力模式。");
                         Endurance.ToggleEndurance(false);
                     }
                     potted = !P.Config.AbortIfNoFoodPot;
@@ -227,8 +227,8 @@ namespace Artisan.Autocraft
                 {
                     if (Endurance.Enable)
                     {
-                        Svc.Toasts.ShowError("Manual not found. Disabling Endurance.");
-                        DuoLog.Error("Manual not found. Disabling Endurance.");
+                        Svc.Toasts.ShowError("未找到指南。正在禁用耐力模式。");
+                        DuoLog.Error("未找到指南。正在禁用耐力模式。");
                         Endurance.ToggleEndurance(false);
                     }
                     manualed = !P.Config.AbortIfNoFoodPot;
@@ -246,8 +246,8 @@ namespace Artisan.Autocraft
                 {
                     if (Endurance.Enable)
                     {
-                        Svc.Toasts.ShowError("Squadron Manual not found. Disabling Endurance.");
-                        DuoLog.Error("Squadron Manual not found. Disabling Endurance.");
+                        Svc.Toasts.ShowError("未找到部队指南。正在禁用耐力模式。");
+                        DuoLog.Error("未找到部队指南。正在禁用耐力模式。");
                         Endurance.ToggleEndurance(false);
                     }
                     squadronManualed = !P.Config.AbortIfNoFoodPot;

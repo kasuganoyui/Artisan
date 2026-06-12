@@ -59,7 +59,7 @@ public class ExpertSolverProfiles
     {
         var defaultConfig = new ExpertProfile();
         defaultConfig.ID = 0;
-        defaultConfig.Name = "Use Global Settings";
+        defaultConfig.Name = "使用全局设置";
         defaultConfig.Settings = P.Config.ExpertSolverConfig;
         return defaultConfig;
     }

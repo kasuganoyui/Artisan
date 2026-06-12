@@ -75,6 +75,9 @@ namespace Artisan.IPC
             Svc.PluginInterface.GetIpcProvider<uint, uint, bool, object>("Artisan.ChangeExpertMaxSteadyUses").RegisterAction(ChangeExpertMaxSteadyUses);
             Svc.PluginInterface.GetIpcProvider<uint, object>("Artisan.SetTempExpertMaxSteadyUsesBackToNormal").RegisterAction(SetTempExpertMaxSteadyUsesBackToNormal);
 
+            Svc.PluginInterface.GetIpcProvider<uint, uint, bool, object>("Artisan.ChangeRaphaelMaxStellarHand").RegisterAction(ChangeRaphaelMaxStellarHand);
+            Svc.PluginInterface.GetIpcProvider<uint, object>("Artisan.SetTempRaphaelMaxStellarHandBackToNormal").RegisterAction(SetTempRaphaelMaxStellarHandBackToNormal);
+
             Svc.PluginInterface.GetIpcProvider<uint, uint, bool, object>("Artisan.ChangeExpertMaxMaterialMiracleUses").RegisterAction(ChangeExpertMaxMaterialMiracleUses);
             Svc.PluginInterface.GetIpcProvider<uint, object>("Artisan.SetTempExpertMaxMaterialMiracleUsesBackToNormal").RegisterAction(SetTempExpertMaxMaterialMiracleUsesBackToNormal);
 
@@ -126,6 +129,9 @@ namespace Artisan.IPC
 
             Svc.PluginInterface.GetIpcProvider<uint, uint, bool, object>("Artisan.ChangeExpertMaxSteadyUses").UnregisterAction();
             Svc.PluginInterface.GetIpcProvider<uint, object>("Artisan.SetTempExpertMaxSteadyUsesBackToNormal").UnregisterAction();
+
+            Svc.PluginInterface.GetIpcProvider<uint, uint, bool, object>("Artisan.ChangeRaphaelMaxStellarHand").UnregisterAction();
+            Svc.PluginInterface.GetIpcProvider<uint, object>("Artisan.SetTempRaphaelMaxStellarHandBackToNormal").UnregisterAction();
 
             Svc.PluginInterface.GetIpcProvider<uint, uint, bool, object>("Artisan.ChangeExpertMaxMaterialMiracleUses").UnregisterAction();
             Svc.PluginInterface.GetIpcProvider<uint, object>("Artisan.SetTempExpertMaxMaterialMiracleUsesBackToNormal").UnregisterAction();
@@ -228,9 +234,10 @@ namespace Artisan.IPC
                 var craft = Crafting.BuildCraftStateForRecipe(stats, job, recipe);
                 var solvers = CraftingProcessor.GetAvailableSolversForRecipe(craft, false);
 
+                var requestedSolverName = LocalizeSolverName(solverName);
                 foreach (var solver in solvers)
                 {
-                    if (solver.Name == solverName)
+                    if (solver.Name == solverName || solver.Name == requestedSolverName)
                     {
                         if (temporary)
                         {
@@ -309,6 +316,21 @@ namespace Artisan.IPC
                 P.Config.RecipeConfigs[recipeId] = config;
                 P.Config.Save();
             }
+        }
+
+        private static string LocalizeSolverName(string solverName)
+        {
+            if (solverName.StartsWith("Macro: ", StringComparison.Ordinal))
+                return $"宏：{solverName["Macro: ".Length..]}";
+
+            return solverName switch
+            {
+                "Expert Recipe Solver" => "专家配方求解器",
+                "Standard Recipe Solver" => "标准配方求解器",
+                "Raphael Recipe Solver" => "Raphael 配方求解器",
+                "Progress Only Solver" => "仅推进求解器",
+                _ => solverName,
+            };
         }
 
         /// <summary>
@@ -394,6 +416,28 @@ namespace Artisan.IPC
             else
             {
                 config.expertMaxSteadyUses = maxSteadyUses;
+                P.Config.RecipeConfigs[recipeId] = config;
+                P.Config.Save();
+            }
+        }
+
+        /// <summary>
+        /// Change Raphael's maximum Stellar Steady Hand uses for a given recipe.
+        /// </summary>
+        /// <param name="recipeId">The ID of the recipe to be changed</param>
+        /// <param name="maxUses">Number of Stellar Steady Hand uses (0 to disable)</param>
+        /// <param name="temporary">Whether to keep this change in memory only</param>
+        public static void ChangeRaphaelMaxStellarHand(uint recipeId, uint maxUses, bool temporary)
+        {
+            var config = P.Config.RecipeConfigs.GetValueOrDefault(recipeId) ?? new();
+            if (temporary)
+            {
+                config.TempRaphaelMaxStellarHand = maxUses;
+                P.Config.RecipeConfigs[recipeId] = config;
+            }
+            else
+            {
+                config.raphaelMaxStellarHand = maxUses;
                 P.Config.RecipeConfigs[recipeId] = config;
                 P.Config.Save();
             }
@@ -575,6 +619,13 @@ namespace Artisan.IPC
             var config = P.Config.RecipeConfigs.GetValueOrDefault(recipeId) ?? new();
             if (config.TempExpertMaxSteadyUses != null)
                 config.TempExpertMaxSteadyUses = null;
+        }
+
+        public static void SetTempRaphaelMaxStellarHandBackToNormal(uint recipeId)
+        {
+            var config = P.Config.RecipeConfigs.GetValueOrDefault(recipeId) ?? new();
+            if (config.TempRaphaelMaxStellarHand != null)
+                config.TempRaphaelMaxStellarHand = null;
         }
 
         [Obsolete("Deprecated; please use SetTempExpertMaxMaterialMiracleUsesBackToNormal")]

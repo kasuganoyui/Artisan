@@ -55,7 +55,7 @@ public class ScriptSolverCompiler : IDisposable
             bool ok = _compilationQueue.TryDequeue(out var script);
             if (!ok)
             {
-                Svc.Log.Error($"[ArtisanScript] Failed to dequeue script to compile, please report this error to the developer.");
+                Svc.Log.Error($"[ArtisanScript] 无法从队列中取出脚本进行编译，请将此错误报告给开发者。");
                 throw new Exception("Failed to dequeue a script for compilation");
             }
 
@@ -68,11 +68,11 @@ public class ScriptSolverCompiler : IDisposable
                 var compiled = Compile(script.SourcePath, referenceList);
                 diagnostics = compiled.diagnostics;
                 if (compiled.binary == null)
-                    throw new Exception($"Compilation failed:\n{compiled.diagnostics}");
+                    throw new Exception($"编译失败：\n{compiled.diagnostics}");
                 var asm = Load(compiled.binary);
                 var type = asm.GetTypes().FirstOrDefault(t => t.BaseType?.FullName == "Artisan.CraftingLogic.Solver");
                 if (type == null)
-                    throw new Exception($"Source {script.SourcePath} does not contain any classes derived from Solver");
+                    throw new Exception($"源文件 {script.SourcePath} 未包含任何继承自 Solver 的类");
                 script.UpdateCompilation(compiled.worst >= DiagnosticSeverity.Warning ? ScriptSolverSettings.CompilationState.SuccessWarnings : ScriptSolverSettings.CompilationState.SuccessClean, compiled.diagnostics, type);
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ public class ScriptSolverCompiler : IDisposable
             using var stream = new MemoryStream(assembly);
             return context.LoadFromStream(stream);
         }
-        throw new Exception("Failed to get local plugin");
+        throw new Exception("获取本地插件失败");
     }
 
     private static ImmutableList<MetadataReference> BuildReferenceList()

@@ -9,12 +9,12 @@ namespace Artisan.CraftingLogic.Solvers
 
         public IEnumerable<ISolverDefinition.Desc> Flavours(CraftState craft)
         {
-            yield return new(this, 0, 1, "Progress Only Solver");
+            yield return new(this, 0, 1, "仅推进求解器");
         }
 
         public IEnumerable<ISolverDefinition.Desc> Flavours()
         {
-            yield return new(this, 0, 1, "Progress Only Solver");
+            yield return new(this, 0, 1, "仅推进求解器");
         }
     }
 

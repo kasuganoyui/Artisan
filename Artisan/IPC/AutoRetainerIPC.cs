@@ -10,7 +10,6 @@ internal class AutoRetainerIPC : IDisposable
 
     public AutoRetainerIPC()
     {
-       
     }
 
     internal static bool IsEnabled()
@@ -42,6 +41,5 @@ internal class AutoRetainerIPC : IDisposable
 
     public void Dispose()
     {
-        
     }
 }

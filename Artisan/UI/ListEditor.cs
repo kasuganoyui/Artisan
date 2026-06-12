@@ -92,7 +92,7 @@ internal class ListEditor : Window, IDisposable
     public bool loading;
 
     public ListEditor(NewCraftingList list)
-        : base($"List Editor###{list.ID}")
+        : base($"制作清单编辑器###{list.ID}")
     {
         SelectedList = list;
         RecipeSelector = new RecipeSelector(SelectedList);
@@ -117,7 +117,7 @@ internal class ListEditor : Window, IDisposable
         var list = await IngredientHelper.GenerateList(SelectedList, source);
         if (list is null)
         {
-            Svc.Log.Debug($"Table list empty, aborting.");
+            Svc.Log.Debug($"表格列表为空，正在中止。");
             return;
         }
         Table = new IngredientTable(list);
@@ -130,12 +130,12 @@ internal class ListEditor : Window, IDisposable
         P.UniversalsisClient.PlayerWorld = Svc.ClientState.IsLoggedIn ? Svc.Objects.LocalPlayer?.CurrentWorld.RowId : 0;
         if (RegenerateTask == null || RegenerateTask.IsCompleted)
         {
-            Svc.Log.Debug($"Starting regeneration");
+            Svc.Log.Debug($"正在开始重新生成");
             RegenerateTask = Task.Run(() => GenerateTableAsync(source), token);
         }
         else
         {
-            Svc.Log.Debug($"Stopping and restarting regeneration");
+            Svc.Log.Debug($"正在停止并重新开始重新生成");
             if (source != null)
                 source.Cancel();
 
@@ -189,12 +189,12 @@ internal class ListEditor : Window, IDisposable
     {
         try
         {
-            var btn = ImGuiHelpers.GetButtonSize("Begin Crafting List");
+            var btn = ImGuiHelpers.GetButtonSize("开始制作清单");
 
             if (Endurance.Enable || CraftingListUI.Processing)
                 ImGui.BeginDisabled();
 
-            if (ImGui.Button("Begin Crafting List"))
+            if (ImGui.Button("开始制作清单"))
             {
                 CraftingListUI.selectedList = this.SelectedList;
                 CraftingListUI.StartList();
@@ -205,15 +205,15 @@ internal class ListEditor : Window, IDisposable
                 ImGui.EndDisabled();
 
             ImGui.SameLine();
-            var export = ImGuiHelpers.GetButtonSize("Export List");
+            var export = ImGuiHelpers.GetButtonSize("导出清单");
 
-            if (ImGui.Button("Export List"))
+            if (ImGui.Button("导出清单"))
             {
                 ImGui.SetClipboardText(JsonConvert.SerializeObject(P.Config.NewCraftingLists.Where(x => x.ID == SelectedList.ID).First()));
-                Notify.Success("List exported to clipboard.");
+                Notify.Success("清单已导出到剪贴板。");
             }
 
-            var restock = ImGuiHelpers.GetButtonSize("Restock From Retainers");
+            var restock = ImGuiHelpers.GetButtonSize("从雇员补货");
             if (RetainerInfo.ATools)
             {
                 ImGui.SameLine();
@@ -221,13 +221,13 @@ internal class ListEditor : Window, IDisposable
                 if (Endurance.Enable || CraftingListUI.Processing)
                     ImGui.BeginDisabled();
 
-                if (ImGui.Button($"Restock From Retainers"))
+                if (ImGui.Button($"从雇员补货"))
                 {
                     Task.Run(() => RetainerInfo.RestockFromRetainers(SelectedList));
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Checkbox("Only Restock Non-Crafted Items", ref SelectedList.OnlyRestockNonCrafted))
+                if (ImGui.Checkbox("仅补货非制作物品", ref SelectedList.OnlyRestockNonCrafted))
                     P.Config.Save();
 
                 if (Endurance.Enable || CraftingListUI.Processing)
@@ -238,13 +238,13 @@ internal class ListEditor : Window, IDisposable
                 ImGui.SameLine();
 
                 if (!RetainerInfo.AToolsInstalled)
-                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"Please install Allagan Tools for retainer features.");
+                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"请安装 Allagan Tools 以使用雇员功能。");
 
                 if (RetainerInfo.AToolsInstalled && !RetainerInfo.AToolsEnabled)
-                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"Please enable Allagan Tools for retainer features.");
+                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"请启用 Allagan Tools 以使用雇员功能。");
 
                 if (RetainerInfo.AToolsEnabled)
-                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"You have turned off Allagan Tools integration.");
+                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"您已关闭 Allagan Tools 集成。");
             }
 
             if (ImGui.BeginTabBar("CraftingListEditor", ImGuiTabBarFlags.None))
@@ -267,7 +267,7 @@ internal class ListEditor : Window, IDisposable
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("List Settings"))
+                if (ImGui.BeginTabItem("清单设置"))
                 {
                     DrawListSettings();
                     ImGui.EndTabItem();
@@ -275,7 +275,7 @@ internal class ListEditor : Window, IDisposable
 
                 if (!SelectedList.IsPremade)
                 {
-                    if (ImGui.BeginTabItem("Copy From Other List"))
+                    if (ImGui.BeginTabItem("从其他清单复制"))
                     {
                         DrawCopyFromList();
                         ImGui.EndTabItem();
@@ -293,7 +293,7 @@ internal class ListEditor : Window, IDisposable
     {
         if (P.Config.NewCraftingLists.Count > 1)
         {
-            ImGuiEx.TextWrapped($"Select List");
+            ImGuiEx.TextWrapped($"选择清单");
             ImGuiEx.SetNextItemFullWidth();
             if (ImGui.BeginCombo("###ListCopyCombo", copyList is null ? "" : copyList.Name))
             {
@@ -314,12 +314,12 @@ internal class ListEditor : Window, IDisposable
         }
         else
         {
-            ImGui.Text($"Please add other lists to copy from");
+            ImGui.Text($"请添加其他清单以从中复制");
         }
 
         if (copyList != null)
         {
-            ImGui.Text($"This will copy:");
+            ImGui.Text($"这将复制：");
             ImGui.Indent();
             if (ImGui.BeginListBox("###ItemList", new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - 30f)))
             {
@@ -331,7 +331,7 @@ internal class ListEditor : Window, IDisposable
                 ImGui.EndListBox();
             }
             ImGui.Unindent();
-            if (ImGui.Button($"Copy Items"))
+            if (ImGui.Button($"复制物品"))
             {
                 foreach (var recipe in copyList.Recipes)
                 {
@@ -342,7 +342,7 @@ internal class ListEditor : Window, IDisposable
                     else
                         SelectedList.Recipes.Add(new ListItem() { Quantity = recipe.Quantity, ID = recipe.ID });
                 }
-                Notify.Success($"All items copied from {copyList.Name} to {SelectedList.Name}.");
+                Notify.Success($"所有物品已从 {copyList.Name} 复制到 {SelectedList.Name}。");
                 RecipeSelector.Items = SelectedList.Recipes.Distinct().ToList();
                 RefreshTable(null, true);
                 P.Config.Save();
@@ -355,11 +355,11 @@ internal class ListEditor : Window, IDisposable
         int colCount = RetainerInfo.ATools ? 4 : 3;
         if (ImGui.BeginTable("###SubTableRecipeData", colCount, ImGuiTableFlags.Borders))
         {
-            ImGui.TableSetupColumn("Ingredient", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("Required", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("Inventory", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("材料", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("所需", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("背包", ImGuiTableColumnFlags.WidthFixed);
             if (RetainerInfo.ATools)
-                ImGui.TableSetupColumn("Retainers", ImGuiTableColumnFlags.WidthFixed);
+                ImGui.TableSetupColumn("雇员", ImGuiTableColumnFlags.WidthFixed);
             ImGui.TableHeadersRow();
 
             if (subtableList.Count == 0)
@@ -440,7 +440,7 @@ internal class ListEditor : Window, IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.TextWrapped("Show only recipes you have materials for (toggle to refresh)");
+        ImGui.TextWrapped("仅显示有材料的配方（切换以刷新）");
 
         if (P.Config.ShowOnlyCraftable && RetainerInfo.ATools)
         {
@@ -456,14 +456,14 @@ internal class ListEditor : Window, IDisposable
             }
 
             ImGui.SameLine();
-            ImGui.TextWrapped("Include Retainers");
+            ImGui.TextWrapped("包含雇员");
         }
 
         var preview = SelectedRecipe is null
                           ? string.Empty
                           : $"{SelectedRecipe!.Value.ItemResult.Value.Name.ToDalamudString().ToString()} ({LuminaSheets.ClassJobSheet[SelectedRecipe!.Value.CraftType.RowId + 8].Abbreviation.ToString()})";
 
-        if (ImGui.BeginCombo("Select Recipe", preview))
+        if (ImGui.BeginCombo("选择配方", preview))
         {
             DrawRecipeList();
 
@@ -472,19 +472,19 @@ internal class ListEditor : Window, IDisposable
 
         if (SelectedRecipe! != null)
         {
-            if (ImGui.CollapsingHeader("Recipe Information")) DrawRecipeOptions();
+            if (ImGui.CollapsingHeader("配方信息")) DrawRecipeOptions();
             if (SelectedRecipeRawIngredients.Count == 0)
                 CraftingListHelpers.AddRecipeIngredientsToList(SelectedRecipe!, ref SelectedRecipeRawIngredients);
 
-            if (ImGui.CollapsingHeader("Raw Ingredients"))
+            if (ImGui.CollapsingHeader("基础材料"))
             {
-                ImGui.Text("Raw Ingredients Required");
+                ImGui.Text("所需基础材料");
                 DrawRecipeSubTable();
             }
 
             ImGui.Spacing();
             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().Length() / 2f);
-            ImGui.TextWrapped("Number of times to add");
+            ImGui.TextWrapped("添加次数");
             ImGui.SameLine();
             ImGui.InputInt("###TimesToAdd", ref timesToAdd, 1, 5);
             ImGui.PushItemWidth(-1f);
@@ -492,13 +492,13 @@ internal class ListEditor : Window, IDisposable
             if (timesToAdd < 1)
                 ImGui.BeginDisabled();
 
-            if (ImGui.Button("Add to List", new Vector2(ImGui.GetContentRegionAvail().X / 2, 30)))
+            if (ImGui.Button("添加到清单", new Vector2(ImGui.GetContentRegionAvail().X / 2, 30)))
             {
                 AddToList(SelectedRecipe!.Value, false, true);
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Add to List (with all sub-crafts)", new Vector2(ImGui.GetContentRegionAvail().X, 30)))
+            if (ImGui.Button("添加到清单（包含所有子制作）", new Vector2(ImGui.GetContentRegionAvail().X, 30)))
             {
                 AddToList(SelectedRecipe!.Value, true, true);
             }
@@ -508,11 +508,11 @@ internal class ListEditor : Window, IDisposable
 
 
         }
-        if (ImGui.Checkbox("Adjust all sub-crafts after changing quantities", ref SelectedList.TidyAfter))
+        if (ImGui.Checkbox("更改数量后调整所有子制作", ref SelectedList.TidyAfter))
             P.Config.Save();
 
-        ImGuiComponents.HelpMarker("This has been reworked! Having this enabled will adjust all quantities in your list rather than just removing unrequired crafts. It will now also add more crafts where required. It will also sort the list afterwards to make sure it's crafting in the right order in case you have removed items.\n\n" +
-            "Quick disclaimer: This will treat whatever item you have selected as a \"Final Craft\" and only adjust sub-crafts required for that item, and not anything this item may be used for e.g changing lumber won't update crafts that use that lumber.");
+        ImGuiComponents.HelpMarker("此功能已重做！启用后将调整清单中的所有数量，而不仅仅是移除不需要的制作。它现在还会在需要的地方添加更多制作。它还会在之后对清单进行排序，以确保在您移除物品后按正确顺序进行制作。\n\n" +
+            "快速声明：这会将您选择的任何物品视为\"最终成品\"，并且仅调整该物品所需的子制作，而不会调整该物品可能用于的其他用途，例如更改木材不会更新使用该木材的制作。");
         ImGui.Separator();
 
         if (ImGui.Button($"Sort"))
@@ -521,10 +521,10 @@ internal class ListEditor : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
         {
-            ImGuiEx.Tooltip($"This will sort your list by recipe depth, then difficulty. Recipe depth is defined by how many of the ingredients depend on other recipes on the list.\n\n" +
-                $"For example: {LuminaSheets.RecipeSheet[35508].ItemResult.Value.Name.ToDalamudString()} requires {LuminaSheets.ItemSheet[36186].Name}, which in turn requires {LuminaSheets.ItemSheet[36189].Name}, giving this recipe a depth of 3 if all these items are on the list.\n" +
-                $"Items that do not have other recipe dependencies have a depth of 1, so go to the top of the list, e.g {LuminaSheets.RecipeSheet[5299].ItemResult.Value.Name.ToDalamudString()}\n\n" +
-                $"Finally, this is sorted by the in-game difficulty of the crafts, hopefully grouping together similar crafts.");
+            ImGuiEx.Tooltip($"这将按配方深度和难度对清单进行排序。配方深度由清单中有多少材料的来源依赖于其他配方来决定。\n\n" +
+                $"例如：{LuminaSheets.RecipeSheet[35508].ItemResult.Value.Name.ToDalamudString()} 需要 {LuminaSheets.ItemSheet[36186].Name}，而它又需要 {LuminaSheets.ItemSheet[36189].Name}。如果这些物品都在清单中，此配方深度为 3。\n" +
+                $"没有其他配方依赖的物品深度为 1，因此会排在清单顶部，例如 {LuminaSheets.RecipeSheet[5299].ItemResult.Value.Name.ToDalamudString()}\n\n" +
+                $"最后，按制作的游戏内难度进行排序，希望能将相似的制作分组在一起。");
         }
 
         ImGui.SameLine();
@@ -534,7 +534,7 @@ internal class ListEditor : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
         {
-            ImGuiEx.Tooltip("This will toggle all items in this list between being skipped and being enabled.");
+            ImGuiEx.Tooltip("这将切换此清单中所有物品在跳过和启用之间的状态。");
         }
 
         Task.Run(() =>
@@ -543,12 +543,12 @@ internal class ListEditor : Window, IDisposable
         });
         string duration = listTime == TimeSpan.Zero ? "Unknown" : string.Format("{0:D2}d {1:D2}h {2:D2}m {3:D2}s", listTime.Days, listTime.Hours, listTime.Minutes, listTime.Seconds);
         ImGui.SameLine();
-        ImGui.Text($"Approximate List Time: {duration}");
+        ImGui.Text($"预计清单用时：{duration}");
 
         if (loading)
         {
             ImGui.SameLine();
-            ImGuiEx.LineCentered(() => ImGuiEx.TextUnderlined(GradientColor.Get(ImGuiColors.DalamudWhite, ImGuiColors.DalamudYellow, 200), "REFRESHING LIST QUANTITIES"));
+            ImGuiEx.LineCentered(() => ImGuiEx.TextUnderlined(GradientColor.Get(ImGuiColors.DalamudWhite, ImGuiColors.DalamudYellow, 200), "正在刷新清单数量"));
         }
 
     }
@@ -561,7 +561,7 @@ internal class ListEditor : Window, IDisposable
         if (withSubcrafts)
             CraftingListUI.AddAllSubcrafts(r, SelectedList, 1, timesToAdd);
 
-        Svc.Log.Debug($"Adding: {r.ItemResult.Value.Name.ToDalamudString().ToString()} {timesToAdd} times");
+        Svc.Log.Debug($"正在添加：{r.ItemResult.Value.Name.ToDalamudString().ToString()} {timesToAdd} 次");
         if (SelectedList.Recipes.Any(x => x.ID == r.RowId))
         {
             SelectedList.Recipes.First(x => x.ID == r.RowId).Quantity += timesToAdd;
@@ -665,12 +665,12 @@ internal class ListEditor : Window, IDisposable
         if (P.Config.ShowOnlyCraftable && !RetainerInfo.CacheBuilt)
         {
             if (RetainerInfo.ATools)
-                ImGui.TextWrapped($"Building Retainer Cache: {(RetainerInfo.RetainerData.Values.Any() ? RetainerInfo.RetainerData.FirstOrDefault().Value.Count : "0")}/{LuminaSheets.RecipeSheet!.Select(x => x.Value).SelectMany(x => x.Ingredients()).Where(x => x.Item.RowId != 0 && x.Amount > 0).DistinctBy(x => x.Item.RowId).Count()}");
-            ImGui.TextWrapped($"Building Craftable Items List: {CraftingListUI.CraftableItems.Count}/{LuminaSheets.RecipeSheet.Count}");
+                ImGui.TextWrapped($"正在构建雇员缓存：{(RetainerInfo.RetainerData.Values.Any() ? RetainerInfo.RetainerData.FirstOrDefault().Value.Count : "0")}/{LuminaSheets.RecipeSheet!.Select(x => x.Value).SelectMany(x => x.Ingredients()).Where(x => x.Item.RowId != 0 && x.Amount > 0).DistinctBy(x => x.Item.RowId).Count()}");
+            ImGui.TextWrapped($"正在构建可制作物品列表：{CraftingListUI.CraftableItems.Count}/{LuminaSheets.RecipeSheet.Count}");
             ImGui.Spacing();
         }
 
-        ImGui.Text("Search");
+        ImGui.Text("搜索");
         ImGui.SameLine();
         ImGui.InputText("###RecipeSearch", ref Search, 150);
         if (ImGui.Selectable(string.Empty, SelectedRecipe == null))
@@ -686,7 +686,7 @@ internal class ListEditor : Window, IDisposable
 
         recipes = recipes.Where(x => IsValidRecipe(x));
 
-        if (Search.Length > 0 && ImGui.Selectable("Add all visible"))
+        if (Search.Length > 0 && ImGui.Selectable("添加所有可见项"))
         {
             Task.Run(() =>
             {
@@ -697,7 +697,7 @@ internal class ListEditor : Window, IDisposable
             }).ContinueWith(_ => { RefreshTable(null, true); P.Config.Save(); });
         }
 
-        if (Search.Length > 0 && ImGui.Selectable("Add all visible (with sub-crafts)"))
+        if (Search.Length > 0 && ImGui.Selectable("添加所有可见项（包含子制作）"))
         {
             Task.Run(() =>
             {
@@ -770,7 +770,7 @@ internal class ListEditor : Window, IDisposable
         {
             List<uint> craftingJobs = LuminaSheets.RecipeSheet.Values.Where(x => x.ItemResult.Value.Name.ToDalamudString().ToString() == SelectedRecipe!.Value.ItemResult.Value.Name.ToDalamudString().ToString()).Select(x => x.CraftType.Value.RowId + 8).ToList();
             string[]? jobstrings = LuminaSheets.ClassJobSheet.Values.Where(x => craftingJobs.Any(y => y == x.RowId)).Select(x => x.Abbreviation.ToString()).ToArray();
-            ImGui.Text($"Crafted by: {string.Join(", ", jobstrings)}");
+            ImGui.Text($"制作职业：{string.Join(", ", jobstrings)}");
         }
 
         var ItemsRequired = SelectedRecipe!.Value.Ingredients();
@@ -778,13 +778,13 @@ internal class ListEditor : Window, IDisposable
         int numRows = RetainerInfo.ATools ? 6 : 5;
         if (ImGui.BeginTable("###RecipeTable", numRows, ImGuiTableFlags.Borders))
         {
-            ImGui.TableSetupColumn("Ingredient", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("Required", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("Inventory", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("材料", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("所需", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("背包", ImGuiTableColumnFlags.WidthFixed);
             if (RetainerInfo.ATools)
-                ImGui.TableSetupColumn("Retainers", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("Method", ImGuiTableColumnFlags.WidthFixed);
-            ImGui.TableSetupColumn("Source", ImGuiTableColumnFlags.WidthFixed);
+                ImGui.TableSetupColumn("雇员", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("方式", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("来源", ImGuiTableColumnFlags.WidthFixed);
             ImGui.TableHeadersRow();
             try
             {
@@ -829,14 +829,14 @@ internal class ListEditor : Window, IDisposable
 
                     if (ingredientRecipe is not null)
                     {
-                        if (ImGui.Button($"Crafted###search{ingredientRecipe.Value.RowId}"))
+                        if (ImGui.Button($"制作###search{ingredientRecipe.Value.RowId}"))
                         {
                             SelectedRecipe = ingredientRecipe;
                         }
                     }
                     else
                     {
-                        ImGui.Text("Gathered");
+                        ImGui.Text("采集获得");
                     }
 
                     ImGui.TableNextColumn();
@@ -919,7 +919,7 @@ internal class ListEditor : Window, IDisposable
             }
             else
             {
-                ImGui.Text($"Please add items to your list to populate the ingredients tab.");
+                ImGui.Text($"请向制作清单添加物品以填充材料标签页。");
             }
         }
     }
@@ -927,7 +927,7 @@ internal class ListEditor : Window, IDisposable
     {
         if (Table == null && RegenerateTask.IsCompleted)
         {
-            if (ImGui.Button($"Something went wrong creating the table. Try again?"))
+            if (ImGui.Button($"创建表格时出错。重试？"))
             {
                 RefreshTable(null, true);
             }
@@ -935,7 +935,7 @@ internal class ListEditor : Window, IDisposable
         }
         if (Table == null)
         {
-            ImGui.TextUnformatted($"Ingredient table is still populating. Please wait.");
+            ImGui.TextUnformatted($"材料表仍在加载中，请稍候。");
             var a = IngredientHelper.CurrentIngredient;
             var b = IngredientHelper.MaxIngredient;
             ImGui.ProgressBar((float)a / b, new(ImGui.GetContentRegionAvail().X, default), $"{a * 100.0f / b:f2}% ({a}/{b})");
@@ -949,18 +949,18 @@ internal class ListEditor : Window, IDisposable
         Table.Draw(ImGui.GetTextLineHeightWithSpacing());
         ImGui.EndChild();
 
-        ImGui.Checkbox($"Only show HQ crafts", ref HQSubcraftsOnly);
+        ImGui.Checkbox($"仅显示高品质制作", ref HQSubcraftsOnly);
 
-        ImGuiComponents.HelpMarker($"For ingredients that can be crafted, this will only show inventory{(RetainerInfo.ATools ? " and retainer" : "")} counts that are HQ.");
+        ImGuiComponents.HelpMarker($"对于可制作的材料，此选项仅显示高品质的背包{(RetainerInfo.ATools ? "和雇员" : "")}数量。");
 
         ImGui.SameLine();
-        ImGui.Checkbox("Enable Colour Validation", ref ColourValidation);
+        ImGui.Checkbox("启用颜色验证", ref ColourValidation);
 
         ImGui.SameLine();
 
         if (ImGui.GetIO().KeyShift)
         {
-            if (ImGui.Button($"Export Required Ingredients as Plain Text"))
+            if (ImGui.Button($"以纯文本导出所需材料"))
             {
                 StringBuilder sb = new();
                 foreach (var item in Table.ListItems.Where(x => x.Required > 0))
@@ -971,17 +971,17 @@ internal class ListEditor : Window, IDisposable
                 if (!string.IsNullOrEmpty(sb.ToString()))
                 {
                     ImGui.SetClipboardText(sb.ToString());
-                    Notify.Success($"Required items copied to clipboard.");
+                    Notify.Success($"所需材料已复制到剪贴板。");
                 }
                 else
                 {
-                    Notify.Error($"No items required to be copied.");
+                    Notify.Error($"没有需要复制的材料。");
                 }
             }
         }
         else
         {
-            if (ImGui.Button($"Export Remaining Ingredients as Plain Text"))
+            if (ImGui.Button($"以纯文本导出剩余材料"))
             {
                 StringBuilder sb = new();
                 foreach (var item in Table.ListItems.Where(x => x.Remaining > 0))
@@ -992,24 +992,24 @@ internal class ListEditor : Window, IDisposable
                 if (!string.IsNullOrEmpty(sb.ToString()))
                 {
                     ImGui.SetClipboardText(sb.ToString());
-                    Notify.Success($"Remaining items copied to clipboard.");
+                    Notify.Success($"剩余材料已复制到剪贴板。");
                 }
                 else
                 {
-                    Notify.Error($"No items remaining to be copied.");
+                    Notify.Error($"没有剩余材料需要复制。");
                 }
             }
 
             if (ImGui.IsItemHovered())
             {
-                ImGuiEx.Tooltip($"Hold shift to change from remaining to required.");
+                ImGuiEx.Tooltip($"按住 Shift 可切换为导出所需材料。");
             }
 
         }
 
 
         ImGui.SameLine();
-        if (ImGui.Button("Need Help?"))
+        if (ImGui.Button("需要帮助？"))
             ImGui.OpenPopup("HelpPopup");
 
         if (ColourValidation)
@@ -1021,7 +1021,7 @@ internal class ListEditor : Window, IDisposable
             ImGui.PopStyleColor();
             ImGui.SameLine();
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() - 7);
-            ImGui.Text($" - Inventory has all required items {(SelectedList.SkipIfEnough && SelectedList.SkipLiteral ? "" : "or is not required due to owning crafted materials using this ingredient")}");
+            ImGui.Text($" - 背包拥有全部所需材料 {(SelectedList.SkipIfEnough && SelectedList.SkipLiteral ? "" : "或由于已拥有使用该材料的成品而无需制作")}");
 
             if (RetainerInfo.ATools)
             {
@@ -1032,7 +1032,7 @@ internal class ListEditor : Window, IDisposable
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() - 7);
-                ImGui.Text($" - Combination of Retainer & Inventory has all required items");
+                ImGui.Text($" - 雇员与背包组合拥有全部所需材料");
             }
 
             ImGui.PushStyleColor(ImGuiCol.Button, ImGuiColors.ParsedBlue);
@@ -1042,7 +1042,7 @@ internal class ListEditor : Window, IDisposable
             ImGui.PopStyleColor();
             ImGui.SameLine();
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() - 7);
-            ImGui.Text($" - Combination of Inventory & Craftable has all required items.");
+            ImGui.Text($" - 背包与可制作组合拥有全部所需材料。");
         }
 
 
@@ -1056,18 +1056,18 @@ internal class ListEditor : Window, IDisposable
         if (!popup)
             return;
 
-        ImGui.TextWrapped($"This ingredients table shows you everything needed to craft the items on your list. The basic functionality of the table shows you information such as how many of an ingredient is in your inventory, sources of an ingredient, if it has a zone it can be gathered in etc.");
+        ImGui.TextWrapped($"材料表显示制作清单物品所需的一切。基本功能包括显示每种材料的背包数量、材料来源、是否有采集区域等信息。");
         ImGui.Dummy(new Vector2(0));
-        ImGui.BulletText($"You can click on the column headers to filter the results, either through typing or on a pre-determined filter.");
-        ImGui.BulletText($"Right clicking on a header will allow you to show/hide different columns or resize columns.");
-        ImGui.BulletText($"Right clicking on an ingredient name opens a context menu with further options.");
-        ImGui.BulletText($"Clicking and dragging on the space on the headers between columns (as shown by it lighting up) allows you to re-order the columns.");
-        ImGui.BulletText($"Don't see any items? Check the table headers for a red heading. This indicates this column is being filtered on. Right clicking the header will clear the filter.");
-        ImGui.BulletText($"You can extend the functionality of the table by installing the following plugins:\n- Allagan Tools (Enables all retainer features)\n- Item Vendor Lookup\n- Gatherbuddy\n- Monster Loot Hunter");
-        ImGui.BulletText($"Tip: Filter on \"Remaining Needed\" and \"Sources\" when gathering to help filter on items missing, along with sorting by gathered zone\nto help reduce travel times.");
+        ImGui.BulletText($"点击列表头可通过输入或预设条件筛选结果。");
+        ImGui.BulletText($"右键点击列表头可显示/隐藏不同列或调整列宽度。");
+        ImGui.BulletText($"右键点击材料名称可打开更多选项的上下文菜单。");
+        ImGui.BulletText($"点击并拖拽列与列之间的表头区域（高亮显示）可重新排序列。");
+        ImGui.BulletText($"看不到物品？请检查列表头是否有红色标题，表示该列已启用筛选。右键点击列表头可清除筛选。");
+        ImGui.BulletText($"您可以通过安装以下插件扩展表格功能：\n- Allagan Tools（启用所有雇员功能）\n- Item Vendor Lookup\n- Gatherbuddy\n- Monster Loot Hunter");
+        ImGui.BulletText($"提示：采集时筛选\"剩余所需\"和\"来源\"可帮助过滤缺失物品，同时按采集区域排序\n可减少跑图时间。");
 
         ImGui.SetCursorPosY(windowSize.Y - ImGui.GetFrameHeight() - ImGui.GetStyle().WindowPadding.Y);
-        if (ImGui.Button("Close Help", -Vector2.UnitX))
+        if (ImGui.Button("关闭帮助", -Vector2.UnitX))
             ImGui.CloseCurrentPopup();
     }
 
@@ -1075,25 +1075,25 @@ internal class ListEditor : Window, IDisposable
     {
         ImGui.BeginChild("ListSettings", ImGui.GetContentRegionAvail(), false);
         var skipIfEnough = SelectedList.SkipIfEnough;
-        if (ImGui.Checkbox("Skip Crafting Unnecessary Materials", ref skipIfEnough))
+        if (ImGui.Checkbox("跳过制作不必要的材料", ref skipIfEnough))
         {
             SelectedList.SkipIfEnough = skipIfEnough;
             P.Config.Save();
         }
-        ImGuiComponents.HelpMarker($"Will skip crafting any unnecessary materials required for your list.");
+        ImGuiComponents.HelpMarker($"将跳过制作清单所需的任何非必要材料。");
 
         if (skipIfEnough)
         {
             ImGui.Indent();
-            if (ImGui.Checkbox("Skip Up To List Amount", ref SelectedList.SkipLiteral))
+            if (ImGui.Checkbox("跳过多至清单数量", ref SelectedList.SkipLiteral))
             {
                 P.Config.Save();
             }
 
-            ImGuiComponents.HelpMarker("Will continue to craft materials whilst your inventory has less of a material up to the amount the list would craft if starting from zero.\n\n" +
-                "[Recipe Amount Result] x [Number of Crafts] is less than [Inventory Amount].\n\n" +
-                "Use this when crafting materials for items not on your list (eg FC workshop projects)\n\n" +
-                "This will also adjust the ingredient table's remaining column and colour validation to exclude checking for crafted items the ingredient may be used in.");
+            ImGuiComponents.HelpMarker("当背包中的材料数量少于清单从零开始制作时会制作出的数量时，将继续制作材料。\n\n" +
+                "[配方产出数量] x [制作次数] 小于 [背包数量]。\n\n" +
+                "为清单外物品制作材料时使用此选项（例如部队工坊项目）。\n\n" +
+                "这也会调整材料表的剩余列和颜色验证，排除检查该材料可能用于制作的成品。");
             ImGui.Unindent();
         }
 
@@ -1101,7 +1101,7 @@ internal class ListEditor : Window, IDisposable
             ImGui.BeginDisabled();
 
         var materia = SelectedList.Materia;
-        if (ImGui.Checkbox("Automatically Extract Materia", ref materia))
+        if (ImGui.Checkbox("自动提取魔晶石", ref materia))
         {
             SelectedList.Materia = materia;
             P.Config.Save();
@@ -1111,19 +1111,19 @@ internal class ListEditor : Window, IDisposable
         {
             ImGui.EndDisabled();
 
-            ImGuiComponents.HelpMarker("This character has not unlocked materia extraction. This setting will be ignored.");
+            ImGuiComponents.HelpMarker("该角色尚未解锁魔晶石精制，此设置将被忽略。");
         }
         else
-            ImGuiComponents.HelpMarker("Will automatically extract materia from any equipped gear once it's spiritbond is 100%");
+            ImGuiComponents.HelpMarker("当任意已装备装备的精炼度达到100%时，将自动提取其中的魔晶石。");
 
         var repair = SelectedList.Repair;
-        if (ImGui.Checkbox("Automatic Repairs", ref repair))
+        if (ImGui.Checkbox("自动修理", ref repair))
         {
             SelectedList.Repair = repair;
             P.Config.Save();
         }
 
-        ImGuiComponents.HelpMarker($"If enabled, Artisan will automatically repair your gear when any piece reaches the configured repair threshold.\n\nCurrent min gear condition is {RepairManager.GetMinEquippedPercent()}% and cost to repair at a vendor is {RepairManager.GetNPCRepairPrice()} gil.\n\nIf unable to repair with Dark Matter, will try for a nearby repair NPC.");
+        ImGuiComponents.HelpMarker($"启用后，Artisan 将在任意装备耐久度达到设定的修理阈值时自动修理。\n\n当前最低装备耐久度为 {RepairManager.GetMinEquippedPercent()}%，在修理商处修理费用为 {RepairManager.GetNPCRepairPrice()} 金币。\n\n如果无法使用暗物质修理，将尝试寻找附近的修理 NPC。");
 
         if (SelectedList.Repair)
         {
@@ -1132,7 +1132,7 @@ internal class ListEditor : Window, IDisposable
                 P.Config.Save();
         }
 
-        if (ImGui.Checkbox("Set new items added to list as quick synth", ref SelectedList.AddAsQuickSynth))
+        if (ImGui.Checkbox("将新增到清单的物品设为简易制作", ref SelectedList.AddAsQuickSynth))
             P.Config.Save();
 
         ImGui.EndChild();
@@ -1148,7 +1148,7 @@ internal class ListEditor : Window, IDisposable
         ImGui.SameLine();
 
         if (RecipeSelector.Current?.ID > 0)
-            ItemDetailsWindow.Draw("Recipe Options", DrawRecipeSettingsHeader, DrawRecipeSettings);
+            ItemDetailsWindow.Draw("配方选项", DrawRecipeSettingsHeader, DrawRecipeSettings);
     }
 
     private void DrawRecipeSettings()
@@ -1163,7 +1163,7 @@ internal class ListEditor : Window, IDisposable
 
         if (disabled)
             ImGui.BeginDisabled();
-        ImGui.TextWrapped("Adjust Quantity");
+        ImGui.TextWrapped("调整数量");
         ImGuiEx.SetNextItemFullWidth(-30);
         ImGui.InputInt("###AdjustQuantity", ref count);
         if (ImGui.IsItemDeactivatedAfterEdit())
@@ -1207,14 +1207,14 @@ internal class ListEditor : Window, IDisposable
         if (recipe.CanQuickSynth)
         {
             var NQOnly = options.NQOnly;
-            if (ImGui.Checkbox("Quick Synthesis this item", ref NQOnly))
+            if (ImGui.Checkbox("简易制作此物品", ref NQOnly))
             {
                 options.NQOnly = NQOnly;
                 P.Config.Save();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Apply To all###QuickSynthAll"))
+            if (ImGui.Button("应用到全部###QuickSynthAll"))
             {
                 foreach (var r in SelectedList.Recipes.Where(n => LuminaSheets.RecipeSheet[n.ID].CanQuickSynth))
                 {
@@ -1222,19 +1222,19 @@ internal class ListEditor : Window, IDisposable
                     { r.ListItemOptions = new(); }
                     r.ListItemOptions.NQOnly = options.NQOnly;
                 }
-                Notify.Success($"Quick Synth applied to all list items.");
+                Notify.Success($"简易制作已应用到所有清单物品。");
                 P.Config.Save();
             }
 
             if (NQOnly && !P.Config.UseConsumablesQuickSynth)
             {
-                if (ImGui.Checkbox("You do not have quick synth consumables enabled. Turn this on?", ref P.Config.UseConsumablesQuickSynth))
+                if (ImGui.Checkbox("您尚未启用简易制作消耗品，是否开启？", ref P.Config.UseConsumablesQuickSynth))
                     P.Config.Save();
             }
         }
         else
         {
-            ImGui.TextWrapped("This item cannot be quick synthed.");
+            ImGui.TextWrapped("此物品无法简易制作。");
         }
 
         if (disabled)
@@ -1245,7 +1245,7 @@ internal class ListEditor : Window, IDisposable
         if (matchingRecipes.Count > 1)
         {
             var pre = $"{LuminaSheets.ClassJobSheet[recipe.CraftType.RowId + 8].Abbreviation.ToString()}";
-            ImGui.TextWrapped("Switch crafted job");
+            ImGui.TextWrapped("切换制作职业");
             ImGuiEx.SetNextItemFullWidth(-30);
             if (ImGui.BeginCombo("###SwitchJobCombo", pre))
             {
@@ -1298,7 +1298,7 @@ internal class ListEditor : Window, IDisposable
 
             ImGui.SameLine();
 
-            if (ImGui.Button($"Apply to all###FoodApplyAll"))
+            if (ImGui.Button($"应用到全部###FoodApplyAll"))
             {
                 foreach (var r in SelectedList.Recipes.Distinct())
                 {
@@ -1320,7 +1320,7 @@ internal class ListEditor : Window, IDisposable
 
             ImGui.SameLine();
 
-            if (ImGui.Button($"Apply to all###PotionApplyAll"))
+            if (ImGui.Button($"应用到全部###PotionApplyAll"))
             {
                 foreach (var r in SelectedList.Recipes.Distinct())
                 {
@@ -1342,7 +1342,7 @@ internal class ListEditor : Window, IDisposable
 
             ImGui.SameLine();
 
-            if (ImGui.Button($"Apply to all###ManualApplyAll"))
+            if (ImGui.Button($"应用到全部###ManualApplyAll"))
             {
                 foreach (var r in SelectedList.Recipes.Distinct())
                 {
@@ -1363,7 +1363,7 @@ internal class ListEditor : Window, IDisposable
 
             ImGui.SameLine();
 
-            if (ImGui.Button($"Apply to all###SquadManualApplyAll"))
+            if (ImGui.Button($"应用到全部###SquadManualApplyAll"))
             {
                 foreach (var r in SelectedList.Recipes.Distinct())
                 {
@@ -1387,7 +1387,7 @@ internal class ListEditor : Window, IDisposable
 
         ImGui.SameLine();
 
-        if (ImGui.Button($"Apply to all###SolverOnAll"))
+        if (ImGui.Button($"应用到全部###SolverOnAll"))
         {
             foreach (var r in SelectedList.Recipes.Distinct())
             {
@@ -1410,7 +1410,7 @@ internal class ListEditor : Window, IDisposable
             if (config.CurrentSolverType.Contains("Expert") || config.CurrentSolverType == "" && craft.CraftExpert)
             {
                 ImGui.SameLine();
-                if (ImGui.Button($"Apply to all###ExpertProfileOnAll"))
+                if (ImGui.Button($"应用到全部###ExpertProfileOnAll"))
                 {
                     foreach (var r in SelectedList.Recipes.Distinct())
                     {
@@ -1427,20 +1427,20 @@ internal class ListEditor : Window, IDisposable
 
         RaphaelCache.DrawRaphaelDropdown(craft, false);
 
-        ImGuiEx.TextV("Requirements:");
+        ImGuiEx.TextV("需求：");
         ImGui.SameLine();
         using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0, ImGui.GetStyle().ItemSpacing.Y));
         ImGui.SameLine(137.6f.Scale());
-        ImGui.TextWrapped($"Difficulty: {craft.CraftProgress} | Durability: {craft.CraftDurability} | Quality: {(craft.CraftCollectible ? craft.CraftQualityMin3 : craft.CraftQualityMax)}");
-        ImGuiComponents.HelpMarker($"Shows the crafting requirements: Progress needed to complete the craft, how much Durability the recipe has, and Quality target required to reach the highest Quality level (In case of a Collectible). Use this information to select an appropriate macro, if desired.");
+        ImGui.TextWrapped($"难度：{craft.CraftProgress} | 耐久：{craft.CraftDurability} | 品质：{(craft.CraftCollectible ? craft.CraftQualityMin3 : craft.CraftQualityMax)}");
+        ImGuiComponents.HelpMarker($"显示制作需求：完成制作所需的进展值、配方的耐久度，以及达到最高品质等级所需的品质目标（收藏品情况下）。利用此信息选择合适的宏。");
 
-        ImGui.Checkbox($"Assume Max Starting Quality (for simulator)", ref hqSim);
+        ImGui.Checkbox($"假设最大初始品质（用于模拟器）", ref hqSim);
 
         var solverHint = Simulator.SimulatorResult(recipe, config, craft, out var hintColor, hqSim);
         if (!recipe.IsExpert)
             ImGuiEx.TextWrapped(hintColor, solverHint);
         else
-            ImGuiEx.TextWrapped($"Please run this recipe in the simulator for results.");
+            ImGuiEx.TextWrapped($"请在模拟器中运行此配方以查看结果。");
     }
 
     private void DrawRecipeSettingsHeader()
@@ -1558,7 +1558,7 @@ internal class RecipeSelector : ItemSelector<ListItem>
         var itemCount = ItemId.Quantity;
         var yield = LuminaSheets.RecipeSheet[ItemId.ID].AmountResult * itemCount;
         var label =
-            $"{idx + 1}. {ItemId.ID.NameOfRecipe()} x{itemCount}{(yield != itemCount ? $" ({yield} total)" : string.Empty)}";
+            $"{idx + 1}. {ItemId.ID.NameOfRecipe()} x{itemCount}{(yield != itemCount ? $"（共 {yield}）" : string.Empty)}";
         maxSize = ImGui.CalcTextSize(label).X > maxSize ? ImGui.CalcTextSize(label).X : maxSize;
 
         if (ItemId.ListItemOptions is null)
@@ -1570,7 +1570,7 @@ internal class RecipeSelector : ItemSelector<ListItem>
         using (var col = ImRaii.PushColor(ImGuiCol.Text, itemCount == 0 || ItemId.ListItemOptions.Skipping ? ImGuiColors.DalamudRed : ImGuiColors.DalamudWhite))
         {
             var res = ImGui.Selectable(label, idx == CurrentIdx);
-            ImGuiEx.Tooltip($"Right click to {(ItemId.ListItemOptions.Skipping ? "enable" : "skip")} this recipe.");
+            ImGuiEx.Tooltip($"右键点击以{(ItemId.ListItemOptions.Skipping ? "启用" : "跳过")}此配方。");
             if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
                 ItemId.ListItemOptions.Skipping = !ItemId.ListItemOptions.Skipping;
@@ -1605,7 +1605,7 @@ internal class ListFolders : ItemSelector<NewCraftingList>
 
     protected override string DeleteButtonTooltip()
     {
-        return "Permanently delete this crafting list.\r\nHold Ctrl + Click.\r\nThis cannot be undone.";
+        return "永久删除此制作清单。\r\n按住 Ctrl + 点击。\r\n此操作不可撤销。";
     }
 
     protected override bool Filtered(int idx)

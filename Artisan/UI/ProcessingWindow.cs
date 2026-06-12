@@ -10,7 +10,7 @@ namespace Artisan.UI
 {
     internal class ProcessingWindow : Window
     {
-        public ProcessingWindow() : base("Processing List###ProcessingList", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+        public ProcessingWindow() : base("处理清单###ProcessingList", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
         {
             IsOpen = true;
             ShowCloseButton = false;
@@ -57,23 +57,23 @@ namespace Artisan.UI
                     //    P.PluginUi.IsOpen = true;
                     //}
 
-                    ImGui.Text($"Now Processing: {CraftingListUI.selectedList.Name}");
+                    ImGui.Text($"正在处理: {CraftingListUI.selectedList.Name}");
                     ImGui.Separator();
                     ImGui.Spacing();
                     if (CraftingListUI.CurrentProcessedItem != 0)
                     {
-                        ImGuiEx.TextV($"Crafting: {LuminaSheets.RecipeSheet[CraftingListUI.CurrentProcessedItem].ItemResult.Value.Name.ToDalamudString().ToString()}");
-                        ImGuiEx.TextV($"Current Item Progress: {CraftingListUI.CurrentProcessedItemCount} / {CraftingListUI.CurrentProcessedItemListCount}");
-                        ImGuiEx.TextV($"Overall List Progress: {CraftingListFunctions.CurrentIndex + 1} / {CraftingListUI.selectedList.ExpandedList.Count}");
+                        ImGuiEx.TextV($"制作中: {LuminaSheets.RecipeSheet[CraftingListUI.CurrentProcessedItem].ItemResult.Value.Name.ToDalamudString().ToString()}");
+                        ImGuiEx.TextV($"当前物品进度: {CraftingListUI.CurrentProcessedItemCount} / {CraftingListUI.CurrentProcessedItemListCount}");
+                        ImGuiEx.TextV($"总清单进度: {CraftingListFunctions.CurrentIndex + 1} / {CraftingListUI.selectedList.ExpandedList.Count}");
 
-                        string duration = CraftingListFunctions.ListEndTime == TimeSpan.Zero ? "Unknown" : string.Format("{0:D2}d {1:D2}h {2:D2}m {3:D2}s", CraftingListFunctions.ListEndTime.Days, CraftingListFunctions.ListEndTime.Hours, CraftingListFunctions.ListEndTime.Minutes, CraftingListFunctions.ListEndTime.Seconds);
-                        ImGuiEx.TextV($"Approximate Remaining Duration: {duration}");
+                        string duration = CraftingListFunctions.ListEndTime == TimeSpan.Zero ? "未知" : string.Format("{0:D2}天 {1:D2}时 {2:D2}分 {3:D2}秒", CraftingListFunctions.ListEndTime.Days, CraftingListFunctions.ListEndTime.Hours, CraftingListFunctions.ListEndTime.Minutes, CraftingListFunctions.ListEndTime.Seconds);
+                        ImGuiEx.TextV($"预计剩余时间: {duration}");
 
                     }
 
                     if (!CraftingListFunctions.Paused)
                     {
-                        if (ImGui.Button("Pause"))
+                        if (ImGui.Button("暂停"))
                         {
                             CraftingListFunctions.Paused = true;
                             P.TM.Abort();
@@ -83,7 +83,7 @@ namespace Artisan.UI
                     }
                     else
                     {
-                        if (ImGui.Button("Resume"))
+                        if (ImGui.Button("继续"))
                         {
                             if (Crafting.CurState is Crafting.State.IdleNormal or Crafting.State.IdleBetween)
                             {
@@ -96,7 +96,7 @@ namespace Artisan.UI
                     }
 
                     ImGui.SameLine();
-                    if (ImGui.Button("Cancel"))
+                    if (ImGui.Button("取消"))
                     {
                         CraftingListUI.Processing = false;
                         CraftingListFunctions.Paused = false;

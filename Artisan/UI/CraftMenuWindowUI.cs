@@ -36,7 +36,7 @@ namespace Artisan.UI
             TitleBarButtons.Add(new()
             {
                 Icon = FontAwesomeIcon.Cog,
-                ShowTooltip = () => ImGui.SetTooltip("Open Config"),
+                ShowTooltip = () => ImGui.SetTooltip("打开设置"),
                 Click = (x) => P.PluginUi.IsOpen = true,
             });
         }
@@ -103,7 +103,7 @@ namespace Artisan.UI
                 if (foundRecipe == null && expertRecipe)
                     changed = true;
 
-                if (ImGui.Checkbox("Automatic Action Execution Mode", ref autoMode))
+                if (ImGui.Checkbox("自动操作执行模式", ref autoMode))
                 {
                     P.Config.AutoMode = autoMode;
                     P.Config.Save();
@@ -117,7 +117,7 @@ namespace Artisan.UI
                     ImGui.BeginDisabled();
                 }
 
-                if (ImGui.Checkbox("Endurance Mode Toggle", ref enable))
+                if (ImGui.Checkbox("耐力模式开关", ref enable))
                 {
                     Endurance.ToggleEndurance(enable);
                 }
@@ -125,7 +125,7 @@ namespace Artisan.UI
                 if (!CraftingListFunctions.HasItemsForRecipe(Endurance.RecipeID) && !Endurance.Enable)
                 {
                     ImGui.EndDisabled();
-                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"Missing Ingredients:\r\n- {string.Join("\r\n- ", PreCrafting.MissingIngredients(recipe))}");
+                    ImGuiEx.Text(ImGuiColors.DalamudYellow, $"缺少材料：\r\n- {string.Join("\r\n- ", PreCrafting.MissingIngredients(recipe))}");
                 }
 
                 ExpertProfile profile = CraftingProcessor.GetExpertProfileForRecipe(config);
@@ -138,12 +138,12 @@ namespace Artisan.UI
 
                     if (expCfg.OverrideCosmicRecipeSettings && SolverIs(config, "expert"))
                     {
-                        ImGui.TextWrapped("These settings are overridden by your current expert profile.\r\nDisable that option to set it for each recipe.");
+                        ImGui.TextWrapped("这些设置已被您当前的专家配置文件覆盖。\r\n禁用该选项以便为每个配方单独设置。");
                         ImGui.BeginDisabled();
                     }
 
                     ImGui.PushItemWidth(100);
-                    if (ExpertSettingsUI.SliderIntWithIcons("MaxMaterialMiracles", ref maxMiracles, 0, 3, $"{(SolverIs(config, "expert") ? "[ex] " : "")}Max [s!MaterialMiracle] uses"))
+                    if (ExpertSettingsUI.SliderIntWithIcons("MaxMaterialMiracles", ref maxMiracles, 0, 3, $"{(SolverIs(config, "expert") ? "[ex] " : "")}最大 [s!MaterialMiracle] 使用次数"))
                     {
                         if (SolverIs(config, "expert"))
                         {
@@ -158,11 +158,11 @@ namespace Artisan.UI
                     }
 
                     if (expCfg.OverrideCosmicRecipeSettings && SolverIs(config, "expert")) ImGui.EndDisabled();
-                    var mmNote = "To change Raphael solver usage, go to Settings > Raphael Solver Settings.";
+                    var mmNote = "要更改 Raphael 求解器的使用方式，请前往设置 > Raphael 求解器设置。";
                     if (SolverIs(config, "expert"))
-                        ImGuiComponents.HelpMarker($"This setting only applies to the expert solver.\r\n{mmNote}");
+                        ImGuiComponents.HelpMarker($"此设置仅适用于专家求解器。\r\n{mmNote}");
                     if (SolverIs(config, "standard"))
-                        ImGuiComponents.HelpMarker($"This will switch the Standard Recipe Solver over to the Expert Solver for the duration of the buff.\r\n{mmNote}");
+                        ImGuiComponents.HelpMarker($"此选项将在增益效果持续期间将标准配方求解器切换为专家求解器。\r\n{mmNote}");
 
                     if (expCfg.OverrideCosmicRecipeSettings && SolverIs(config, "expert")) ImGui.BeginDisabled();
 
@@ -187,10 +187,10 @@ namespace Artisan.UI
                                 ImGui.EndCombo();
                             }
                             ImGui.SameLine(0.0f, 4.0f);
-                            ExpertSettingsUI.DrawIconText("[ex] When to start");
+                            ExpertSettingsUI.DrawIconText("[ex] 何时开始");
                         }
                         else
-                            ImGui.Text("Use after this many steps:");
+                            ImGui.Text("在此步数后使用：");
 
                         if ((SolverIs(config, "expert") && useMMWhen == MMSet.Steps) || SolverIs(config, "standard"))
                         {
@@ -211,7 +211,7 @@ namespace Artisan.UI
                             if (SolverIs(config, "expert"))
                             {
                                 ImGui.SameLine(0.0f, 4.0f);
-                                ExpertSettingsUI.DrawIconText("[ex] Number of steps");
+                                ExpertSettingsUI.DrawIconText("[ex] 步数");
                             }
                         }
                     }
@@ -228,10 +228,10 @@ namespace Artisan.UI
                         ImGui.PushItemWidth(100);
                         if (expCfg.OverrideCosmicRecipeSettings && SolverIs(config, "expert"))
                         {
-                            ImGui.TextWrapped("This setting is overridden by your current expert profile.\r\nDisable that option to set it for each recipe.");
+                            ImGui.TextWrapped("此设置已被您当前的专家配置文件覆盖。\r\n禁用该选项以便为每个配方单独设置。");
                             ImGui.BeginDisabled();
                         }
-                        if (ExpertSettingsUI.SliderIntWithIcons("MaxSteadyUses", ref maxSteady, 0, 2, "[ex] Max [s!SteadyHand] uses"))
+                        if (ExpertSettingsUI.SliderIntWithIcons("MaxSteadyUses", ref maxSteady, 0, 2, "[ex] 最大 [s!SteadyHand] 使用次数"))
                         {
                             if (expCfg.OverrideCosmicRecipeSettings)
                                 expCfg.MaxSteadyUses = maxSteady;
@@ -240,11 +240,11 @@ namespace Artisan.UI
                             changed = true;
                         }
                         if (expCfg.OverrideCosmicRecipeSettings) ImGui.EndDisabled();
-                        ImGuiComponents.HelpMarker($"This setting only applies to the expert solver.\r\nTo change Raphael solver usage, go to Settings > Raphael Solver Settings.");
+                        ImGuiComponents.HelpMarker($"此设置仅适用于专家求解器。\r\n要更改 Raphael 求解器的使用方式，请前往设置 > Raphael 求解器设置。");
                     }
                     else if (config.SolverIsRaph || config.SolverIsStandard)
                     {
-                        ImGui.TextWrapped($"This mission supports {Skills.SteadyHand.NameOfAction()}. To configure its usage for the Raphael solver, go to Settings > Raphael Solver Settings.");
+                        ImGui.TextWrapped($"此任务支持 {Skills.SteadyHand.NameOfAction()}。要更改 Raphael 求解器的使用方式，请前往设置 > Raphael 求解器设置。");
                     }
                 }
 
@@ -254,7 +254,7 @@ namespace Artisan.UI
 
                     if (SimpleTweaks.IsFocusTweakEnabled())
                     {
-                        ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $@"Warning: You have the ""Auto Focus Recipe Search"" SimpleTweak enabled. This is highly incompatible with Artisan and is recommended to disable it.");
+                        ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $@"警告：您已启用 ""Auto Focus Recipe Search"" SimpleTweak。此功能与 Artisan 高度不兼容，建议将其禁用。");
                     }
 
                     if (Endurance.RecipeID == 0)

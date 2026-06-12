@@ -77,10 +77,10 @@ namespace Artisan.UI.KTK
             {
                 Position = new Vector2(buttonX, buttonY),
                 Size = new Vector2(synthButton->Width, 36),
-                String = $"Craft All ({SynthesizeableCount})",
+                String = $"全部制作 ({SynthesizeableCount})",
                 OnClick = () => SynthesizeX(),
                 IsEnabled = SynthesizeableCount > 0,
-                TextTooltip = "Button added by Artisan.",
+                TextTooltip = "由 Artisan 添加的按钮。",
                 NodeId = 100000
             };
 
@@ -93,7 +93,7 @@ namespace Artisan.UI.KTK
                 OnValueUpdate = (t) =>
                 {
                     val = t;
-                    SynthesizeAll?.String = val == 0 ? $"Craft All ({SynthesizeableCount})" : $"Craft {t}";
+                    SynthesizeAll?.String = val == 0 ? $"全部制作 ({SynthesizeableCount})" : $"制作 {t}";
                 },
                 NodeFlags = synthButton->NodeFlags,
                 Max = SynthesizeableCount,
@@ -147,7 +147,7 @@ namespace Artisan.UI.KTK
             val = Math.Min(SynthesizeableCount, val);
             SynthesizeXCounter.Value = val;
             if (val == 0)
-                SynthesizeAll.String = $"Craft All ({SynthesizeableCount})";
+                SynthesizeAll.String = $"全部制作 ({SynthesizeableCount})";
         }
 
         private void RegularOnSetup(AtkUnitBase* addon)
@@ -174,10 +174,10 @@ namespace Artisan.UI.KTK
             {
                 Position = new Vector2(buttonX, buttonY),
                 Size = new Vector2(synthBg->Width, synthBg->Height),
-                String = $"Craft All ({SynthesizeableCount})",
+                String = $"全部制作 ({SynthesizeableCount})",
                 OnClick = () => SynthesizeX(),
                 IsEnabled = SynthesizeableCount > 0,
-                TextTooltip = "Button added by Artisan.",
+                TextTooltip = "由 Artisan 添加的按钮。",
                 NodeId = 100000
             };
 
@@ -191,7 +191,7 @@ namespace Artisan.UI.KTK
                 OnValueUpdate = (t) =>
                 {
                     val = t;
-                    SynthesizeAll?.String = val == 0 ? $"Craft All ({SynthesizeableCount})" : $"Craft {t}";
+                    SynthesizeAll?.String = val == 0 ? $"全部制作 ({SynthesizeableCount})" : $"制作 {t}";
                 },
                 Max = SynthesizeableCount,
                 IsEnabled = SynthesizeableCount > 0,
