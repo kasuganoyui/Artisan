@@ -1,6 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using System;
 using System.Collections.Generic;
+using static Artisan.CraftingLogic.Solvers.ExpertSolverProfiles;
 using Condition = Artisan.CraftingLogic.CraftData.Condition;
 using Skills = Artisan.RawInformation.Character.Skills;
 
@@ -24,9 +25,36 @@ namespace Artisan.CraftingLogic.Solvers
         }
     }
 
+    public class StandardMiracleExpertSolverDefinition : ISolverDefinition
+    {
+        public string MouseoverDescription { get; set; } = "这是普通配方求解器的变体。使用奇迹之材后，会在增益持续期间直接使用专家配方求解器。";
+
+        public IEnumerable<ISolverDefinition.Desc> Flavours(CraftState craft)
+        {
+            if (!craft.CraftExpert && (craft.CraftHQ || craft.CraftRequiredQuality > 0))
+                yield return new(this, 0, 1, "标准配方求解器（奇迹专家）");
+        }
+
+        public Solver Create(CraftState craft, int flavour) => new StandardMiracleExpertSolver();
+
+        public IEnumerable<ISolverDefinition.Desc> Flavours()
+        {
+            yield return new(this, 0, 1, "标准配方求解器（奇迹专家）");
+        }
+    }
+
+    public class StandardMiracleExpertSolver : StandardSolver
+    {
+        public StandardMiracleExpertSolver() : base(true, true)
+        {
+        }
+    }
+
     public class StandardSolver : Solver
     {
         // for normal crafts, we don't ever want to use manip/wn more than once
+        private readonly bool _directExpertMiracle;
+        private readonly bool _protectActiveManipulation;
         private bool _manipulationUsed;
         private bool _wasteNotUsed;
         private bool _qualityStarted;
@@ -34,16 +62,40 @@ namespace Artisan.CraftingLogic.Solvers
         private bool _trainedEyeUsed;
         private int _materialMiracleUses;
 
-        private Solver? _fallback; //For Material Miracle
+        private ExpertSolver? _fallback; //For Material Miracle
 
-        public StandardSolver()
+        public StandardSolver(bool directExpertMiracle = false, bool protectActiveManipulation = false)
         {
+            _directExpertMiracle = directExpertMiracle;
+            _protectActiveManipulation = protectActiveManipulation;
             _fallback = new ExpertSolver();
+            _fallback.SetActiveProfile(P.Config.ExpertSolverProfiles.GetDefaultProfile());
+        }
+
+        public override Solver Clone()
+        {
+            var clone = (StandardSolver)MemberwiseClone();
+            clone._fallback = (ExpertSolver?)_fallback?.Clone();
+            return clone;
+        }
+
+        public override void SetActiveProfile(ExpertProfile activeProfile)
+        {
+            _fallback?.SetActiveProfile(activeProfile);
         }
 
         public override Recommendation Solve(CraftState craft, StepState step)
         {
             var rec = GetRecommendation(craft, step);
+
+            if (_directExpertMiracle && step.MaterialMiracleActive)
+                return rec;
+
+            if (_protectActiveManipulation && TryGetManipulationPreservingAction(craft, step, rec.Action, out var protectedAction))
+            {
+                rec.Action = protectedAction;
+                return rec;
+            }
 
             if (Simulator.GetDurabilityCost(step, rec.Action) == 0)
             {
@@ -87,6 +139,33 @@ namespace Artisan.CraftingLogic.Solvers
             }
 
             return rec;
+        }
+
+        private static bool TryGetManipulationPreservingAction(CraftState craft, StepState step, Skills action, out Skills protectedAction)
+        {
+            protectedAction = action;
+            if (step.Durability > 10 || step.ManipulationLeft <= 0)
+                return false;
+
+            if (Simulator.GetDurabilityCost(step, action) == 0 && action is not Skills.None and not Skills.MaterialMiracle)
+            {
+                if (!Simulator.SkipUpdates(action))
+                    return true;
+
+                if (Simulator.CanUseAction(craft, step, Skills.Observe))
+                {
+                    protectedAction = Skills.Observe;
+                    return true;
+                }
+            }
+
+            if (WillActFail(craft, step, action) && Simulator.CanUseAction(craft, step, Skills.Observe))
+            {
+                protectedAction = Skills.Observe;
+                return true;
+            }
+
+            return false;
         }
 
         private static bool InTouchRotation(CraftState craft, StepState step)
