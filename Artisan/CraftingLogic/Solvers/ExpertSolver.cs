@@ -27,6 +27,65 @@ public class ExpertSolverDefinition : ISolverDefinition
     }
 }
 
+public class ConservativeFinesseExpertSolverDefinition : ISolverDefinition
+{
+    public string MouseoverDescription { get; set; } = "适用于专家配方。保留专家求解器逻辑，但限制工匠的神技连续消耗 CP。";
+
+    public IEnumerable<ISolverDefinition.Desc> Flavours(CraftState craft)
+    {
+        if (craft.CraftExpert)
+            yield return new(this, 0, 1, "专家配方求解器（保守神技）", craft.StatLevel < 90 ? "需要 90 级" : !craft.UnlockedManipulation ? "需要解锁巧夺天工" : "");
+    }
+
+    public Solver Create(CraftState craft, int flavour) => new ConservativeFinesseExpertSolver();
+
+    public IEnumerable<ISolverDefinition.Desc> Flavours()
+    {
+        yield return new(this, 0, 1, "专家配方求解器（保守神技）");
+    }
+}
+
+public class ConservativeFinesseExpertSolver : ExpertSolver
+{
+    private const int MaxTrainedFinesseUsesAtMaxIq = 1;
+
+    private int _trainedFinesseUsesAtMaxIq;
+    private int _lastTrackedStepIndex = -1;
+
+    public override Recommendation Solve(CraftState craft, StepState step)
+    {
+        TrackTrainedFinesseUse(step);
+
+        var rec = base.Solve(craft, step);
+        if (rec.Action != Skills.TrainedFinesse || _trainedFinesseUsesAtMaxIq < MaxTrainedFinesseUsesAtMaxIq)
+            return rec;
+
+        if (step.Condition == Condition.Good && Simulator.CanUseAction(craft, step, Skills.TricksOfTrade))
+            return new(Skills.TricksOfTrade, $"{rec.Comment}：保守神技转秘诀");
+
+        if (Simulator.CanUseAction(craft, step, Skills.Observe))
+            return new(Skills.Observe, $"{rec.Comment}：保守神技观察");
+
+        return rec;
+    }
+
+    private void TrackTrainedFinesseUse(StepState step)
+    {
+        if (step.IQStacks < 10 || step.PrevComboAction == Skills.ByregotsBlessing)
+        {
+            _trainedFinesseUsesAtMaxIq = 0;
+            _lastTrackedStepIndex = -1;
+            return;
+        }
+
+        if (step.PrevComboAction != Skills.TrainedFinesse || _lastTrackedStepIndex == step.Index)
+            return;
+
+        _trainedFinesseUsesAtMaxIq++;
+        _lastTrackedStepIndex = step.Index;
+    }
+}
+
 // todo, a big one: many experts don't use these odds, the solver should dynamically calculate various optimal logic based on actual odds
 // some thoughts:
 // - any time we want to regain some dura, we can bait pliant and use manip

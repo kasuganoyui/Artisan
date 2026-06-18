@@ -326,6 +326,7 @@ namespace Artisan.IPC
             return solverName switch
             {
                 "Expert Recipe Solver" => "专家配方求解器",
+                "Expert Recipe Solver (Conservative Finesse)" => "专家配方求解器（保守神技）",
                 "Standard Recipe Solver" => "标准配方求解器",
                 "Raphael Recipe Solver" => "Raphael 配方求解器",
                 "Progress Only Solver" => "仅推进求解器",
