@@ -59,6 +59,8 @@ namespace Artisan.CraftingLogic.Solvers
         [NonSerialized]
         public const string RaphaelFileName = "RaphaelCache.dat";
 
+        public static ConcurrentDictionary<RaphaelOptions, MacroSolverSettings.Macro> CurrentCache = [];
+
         internal sealed class RaphaelTaskInfo(CancellationTokenSource cts, Task task, bool fromStartCraft)
         {
             public CancellationTokenSource Cancellation { get; set; } = cts;
@@ -77,7 +79,7 @@ namespace Artisan.CraftingLogic.Solvers
             var stellarHandUses = key.SteadyHandUses;
 
             // nuke the old macro if one exists
-            P.Config.RaphaelSolverCacheV6.TryRemove(key, out _);
+            CurrentCache.TryRemove(key, out _);
 
             var manipulation = config.HasManipulation ? "--manipulation" : "";
             var itemText = $"--custom-recipe {craft.LevelTable.RowId} {craft.CraftProgress} {(craft.CraftCollectible && !craft.IsCosmic ? craft.CraftQualityMin3 : craft.CraftQualityMax)} {craft.CraftDurability} {(craft.CraftExpert ? "1" : "0")} --stellar-steady-hand {stellarHandUses}";
@@ -172,7 +174,7 @@ namespace Artisan.CraftingLogic.Solvers
                                                    .Split(", ")
                                                    .Select(x => int.TryParse(x, out int n) ? n : 0);
 
-                        P.Config.RaphaelSolverCacheV6[key] = new MacroSolverSettings.Macro
+                        CurrentCache[key] = new MacroSolverSettings.Macro
                         {
                             ID = GetNewID(),
                             Name = GetKeyForLookups(key),
@@ -180,9 +182,9 @@ namespace Artisan.CraftingLogic.Solvers
                             Options = CreateOptions(craft, config, stellarHandUses)
                         };
 
-                        Svc.Log.Debug($"Saved new macro to Raphael cache, ID: {P.Config.RaphaelSolverCacheV6[key].ID}");
+                        Svc.Log.Debug($"Saved new macro to Raphael cache, ID: {CurrentCache[key].ID}");
 
-                        info.Succeeded = P.Config.RaphaelSolverCacheV6[key]?.Steps.Count > 0;
+                        info.Succeeded = CurrentCache[key]?.Steps.Count > 0;
                     }
                 }
                 catch (OperationCanceledException)
@@ -371,10 +373,10 @@ namespace Artisan.CraftingLogic.Solvers
 
             var key = GetOptions(craft, config);
             raphaelSolution = null;
-            var hasKey = P.Config.RaphaelSolverCacheV6.ContainsKey(key);
+            var hasKey = CurrentCache.ContainsKey(key);
             if (hasKey)
             {
-                raphaelSolution = P.Config.RaphaelSolverCacheV6[key];
+                raphaelSolution = CurrentCache[key];
                 return true;
             }
             else
@@ -503,13 +505,11 @@ namespace Artisan.CraftingLogic.Solvers
             }
         }
 
-        public static int GetNewID(Configuration? config = null)
+        public static int GetNewID()
         {
-            config ??= P.Config;
-
             var rng = new Random();
             var id = rng.Next(50001, 10000000);
-            while (config.RaphaelSolverCacheV6.Values.FirstOrDefault(m => m.ID == id) != null)
+            while (CurrentCache.Values.FirstOrDefault(m => m.ID == id) != null)
                 id = rng.Next(50001, 10000000);
             return id;
         }
@@ -546,7 +546,8 @@ namespace Artisan.CraftingLogic.Solvers
             if (!v6cache.IsEmpty)
             {
                 Svc.Log.Info($"Loaded existing Raphael cache from file ({v6cache.Keys.Count} entries)");
-                config.RaphaelSolverCacheV6 = v6cache;
+                CurrentCache = v6cache;
+                P.PluginUi.RaphaelCacheUI.Table = null;
             }
             else if (!config.RaphaelSolverCacheV5.IsEmpty && !config.RaphaelV5Converted)
             {
@@ -560,16 +561,20 @@ namespace Artisan.CraftingLogic.Solvers
 
         private static ConcurrentDictionary<RaphaelOptions, MacroSolverSettings.Macro> LoadRaphaelCacheFromFile(Configuration config)
         {
-            var file = new FileInfo(Path.Combine(config.ConfigDirectory.FullName, RaphaelFileName));
+            if (!Player.Available)
+                return [];
+
+            var root = Path.Combine(config.ConfigDirectory.FullName, Player.CID.ToString());
+            var file = new FileInfo(Path.Combine(root, RaphaelFileName));
             if (!file.Exists)
                 return [];
 
             try
             {
                 Svc.Log.Information("Loading Raphael cache from file...");
-                var stringCache = RaphaelCache.ReadCacheFile(file);
+                var stringCache = ReadCacheFile(file);
                 if (stringCache.Count > 0)
-                    return RaphaelCache.ConvertFromStringCache(stringCache);
+                    return ConvertFromStringCache(stringCache);
             }
             catch (Exception e)
             {
@@ -581,11 +586,18 @@ namespace Artisan.CraftingLogic.Solvers
 
         public static void WriteRaphaelCache(Configuration config)
         {
-            var file = new FileInfo(Path.Combine(config.ConfigDirectory.FullName, RaphaelFileName));
+            if (!Player.Available)
+                return;
+
+            var root = Path.Combine(config.ConfigDirectory.FullName, Player.CID.ToString());
+            var file = new FileInfo(Path.Combine(root, RaphaelFileName));
             try
             {
-                var stringCache = RaphaelCache.ConvertToStringCache(config.RaphaelSolverCacheV6);
+                var stringCache = ConvertToStringCache(CurrentCache);
                 var json = JObject.FromObject(stringCache).ToString();
+                if (!Path.Exists(root))
+                    Directory.CreateDirectory(root);
+
                 File.WriteAllText(file.FullName, json);
                 P.PluginUi.RaphaelCacheUI.Table = null;
             }
@@ -662,7 +674,7 @@ namespace Artisan.CraftingLogic.Solvers
 
                 Macro v6Macro = new()
                 {
-                    ID = GetNewID(config),  // v5 didn't enforce ID uniqueness so we'll assign new ones just in case
+                    ID = GetNewID(),  // v5 didn't enforce ID uniqueness so we'll assign new ones just in case
                     Name = newKey,
                     Steps = macro.Steps,
                     Options = newOpts
@@ -671,7 +683,7 @@ namespace Artisan.CraftingLogic.Solvers
                 v6Cache[newOpts] = v6Macro;
             }
 
-            config.RaphaelSolverCacheV6 = v6Cache;
+            CurrentCache = v6Cache;
             config.RaphaelV5Converted = true;
         }
 
@@ -862,9 +874,9 @@ namespace Artisan.CraftingLogic.Solvers
                 }
 
                 ImGui.Dummy(new Vector2(0, 5f));
-                if (ImGui.Button($"清除 Raphael 宏缓存（当前存储 {P.Config.RaphaelSolverCacheV6.Count} 个）"))
+                if (ImGui.Button($"清除 Raphael 宏缓存（当前存储 {RaphaelCache.CurrentCache.Count} 个）"))
                 {
-                    P.Config.RaphaelSolverCacheV6.Clear();
+                    RaphaelCache.CurrentCache.Clear();
                     changed |= true;
                 }
 

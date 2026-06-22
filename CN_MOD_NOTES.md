@@ -1,10 +1,10 @@
 # Artisan Mod 维护说明
 
-更新时间：2026-06-18
+更新时间：2026-06-22
 
 ## 当前状态
 
-- 当前项目源码基线：`4.0.5.15`。
+- 当前项目源码基线：`4.0.5.15` + `upstream/main` 后续提交 `62d4b5c`。
 - 当前 fork 维护内容：保留主要 UI 与运行提示汉化，并补充 ICE 可通过 IPC 按配方覆盖 Raphael 宇宙稳手最大使用次数。
 
 ## 变更记录
@@ -69,3 +69,11 @@
 - 新求解器复用原专家求解器主体逻辑，但在 10 层内静品质阶段限制 `工匠的神技` 连续消耗 CP；已使用一次后，后续神技推荐会优先改为高品质时使用秘诀，其他情况使用观察等待更好条件。
 - `Artisan.ChangeSolver` 增加英文别名 `Expert Recipe Solver (Conservative Finesse)`，方便外部 IPC 调用新求解器。
 - 涉及文件：`CraftingProcessor.cs`、`ExpertSolver.cs`、`IPC.cs`。
+
+### 2026-06-22
+
+- 合并 `upstream/main` 的后续更新：`4ca1ae2`（Raphael 缓存改为按角色保存）和 `62d4b5c`（模拟器运行专家求解器时套用专家配置文件）。
+- 接入上游 `RaphaelCache.CurrentCache` 结构，Raphael 宏缓存从主配置字段迁移为按当前角色独立读写；缓存 UI 和缓存表继续保留中文显示。
+- 保留本地 Raphael 宇宙稳手覆盖逻辑：`RaphaelOptions.SteadyHandUses` 仍统一使用配方临时覆盖、配方永久覆盖、全局设置后的最终值，避免不同稳手上限共用错误缓存。
+- 合并模拟器专家配置文件支持，GUI 模拟器与 Veyn 模拟器运行专家类求解器时会套用对应配方的专家 Profile。
+- 保留本地新增求解器 `标准配方求解器（奇迹专家）` 与 `专家配方求解器（保守神技）`。
